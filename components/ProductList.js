@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
-  FlatList,
   Image,
   StyleSheet,
   Text,
@@ -25,8 +24,6 @@ const LIMIT = 14; // items per fetch
 export default function ShopPage() {
   const colorScheme = useColorScheme();
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { cart } = useCart();
@@ -34,6 +31,7 @@ export default function ShopPage() {
   const [user, setUser] = useState(null);
 
   const token = Constants.expoConfig?.extra?.jwtToken || process.env.EXPO_PUBLIC_JWT_TOKEN;
+
   const toggleCart = () => setBooleanValue(!isBooleanValue);
 
   // Fetch products
@@ -89,50 +87,6 @@ export default function ShopPage() {
     checkLogin();
   }, []);
 
-  const renderProduct = ({ item }) => {
-    const basePrice = item.price || 0;
-    const discountPercent = item.discount || 0;
-    const taxPercent = item.tax || 0;
-    const bottleRefund = item.bottlerefund || 0;
-
-    const discountAmount = (basePrice * discountPercent) / 100;
-    const priceAfterDiscount = basePrice - discountAmount;
-    const taxAmount = (priceAfterDiscount * taxPercent) / 100;
-    const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
-
-    return (
-      <TouchableOpacity
-        onPress={() => router.push(`/product/${item._id}`)}
-        activeOpacity={0.8}
-      >
-        <View style={styles.card}>
-          <View style={styles.imageWrapper}>
-            <Image
-              source={{ uri: item.picture.replace("/upload/", "/upload/q_1/") }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            {item.stock === 0 && (
-              <View style={styles.outOfStockOverlay}>
-                <Text style={styles.outOfStockText}>Out of Stock</Text>
-              </View>
-            )}
-            {discountPercent > 0 && (
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>-{discountPercent}%</Text>
-              </View>
-            )}
-          </View>
-
-          <Text style={styles.name} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -143,24 +97,62 @@ export default function ShopPage() {
 
   return (
     <View style={styles.container}>
-      {/* Products Grid */}
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item._id}
-        renderItem={renderProduct}
-        numColumns={2}
-        contentContainerStyle={{ paddingBottom: 100, ...styles.grid }}
-        ListFooterComponent={() => (
-          <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+      <View style={styles.grid}>
+        {products.map((item) => {
+          const basePrice = item.price || 0;
+          const discountPercent = item.discount || 0;
+          const taxPercent = item.tax || 0;
+          const bottleRefund = item.bottlerefund || 0;
+
+          const discountAmount = (basePrice * discountPercent) / 100;
+          const priceAfterDiscount = basePrice - discountAmount;
+          const taxAmount = (priceAfterDiscount * taxPercent) / 100;
+          const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
+
+          return (
             <TouchableOpacity
-              onPress={() => router.push("/shop")} // Navigate to shop page
-              style={styles.viewMoreBtn}
+              key={item._id}
+              onPress={() => router.push(`/product/${item._id}`)}
+              activeOpacity={0.8}
             >
-              <Text style={styles.viewMoreText}>View More</Text>
+              <View style={styles.card}>
+                <View style={styles.imageWrapper}>
+                  <Image
+                    source={{
+                      uri: item.picture?.replace("/upload/", "/upload/q_1/") 
+                        || "https://via.placeholder.com/150",
+                    }}
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
+                  {item.stock === 0 && (
+                    <View style={styles.outOfStockOverlay}>
+                      <Text style={styles.outOfStockText}>Out of Stock</Text>
+                    </View>
+                  )}
+                  {discountPercent > 0 && (
+                    <View style={styles.discountBadge}>
+                      <Text style={styles.discountText}>-{discountPercent}%</Text>
+                    </View>
+                  )}
+                </View>
+
+                <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+                <Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
+              </View>
             </TouchableOpacity>
-          </View>
-        )}
-      />
+          );
+        })}
+      </View>
+
+      <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+        <TouchableOpacity
+          onPress={() => router.push("/shop")}
+          style={styles.viewMoreBtn}
+        >
+          <Text style={styles.viewMoreText}>View More</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -168,7 +160,7 @@ export default function ShopPage() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   loader: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
-  grid: { padding: 10 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', padding: 10 },
   card: { width: ITEM_WIDTH, margin: 5, backgroundColor: '#fff', padding: 8 },
   imageWrapper: { position: 'relative', width: '100%', height: 150, marginBottom: 6 },
   image: { width: '100%', height: '100%' },
@@ -181,3 +173,4 @@ const styles = StyleSheet.create({
   viewMoreBtn: { paddingHorizontal: 20, paddingVertical: 8, backgroundColor: '#ffc300', borderRadius: 6 },
   viewMoreText: { fontWeight: '700', color: '#000' },
 });
+ 

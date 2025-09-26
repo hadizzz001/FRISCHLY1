@@ -65,10 +65,16 @@ export default function DiscountCarousel() {
       >
         <View style={styles.imageWrapper}>
           <Image
-            source={{ uri: product.picture.replace("/upload/", "/upload/q_1/") }}
-            style={styles.image}
-            resizeMode="cover"
-          />
+  source={{
+    uri: product.picture?.replace("/upload/", "/upload/q_1/") 
+      || "https://via.placeholder.com/150",
+  }}
+  style={styles.image}
+  resizeMode="cover"
+/>
+
+
+
           {product.stock === 0 && (
             <View style={styles.overlay}>
               <Text style={styles.outOfStockText}>Out of Stock</Text>

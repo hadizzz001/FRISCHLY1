@@ -1,126 +1,52 @@
-// app/LoginScreen.js
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+'use client';
+import { useCart } from '@/contexts/CartContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import OrderComponent from '../components/CreateOrderButton';
 
-const API_BASE_URL = "https://frischly-server.onrender.com"; // replace with your API URL
 
-export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [responseData, setResponseData] = useState(null);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter email and password");
-      return;
-    }
+export default function TestOrder() { 
+  const [user, setUser] = useState(null);
+  const { cart } = useCart();
 
-    setLoading(true);
-    setResponseData(null);
+  useEffect(() => {
+    const checkLogin = async () => {
+      const userData = await AsyncStorage.getItem('userData');
+      const guest = await AsyncStorage.getItem('guest');
 
-    const data = { email, password };
+      if (!userData && !guest) {
+        router.replace('/start');
+      } else {
+        try {
+          const parsedUser = userData ? JSON.parse(userData) : null;
+          const token = parsedUser?.token;
 
-    try { 
-      const response = await fetch(`${API_BASE_URL}/api/auth/login-profile`, {
-      // const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+          if (!token) return;
 
-      const result = await response.json();
-      setResponseData(result);
-    } catch (error) {
-      setResponseData({ error: "Something went wrong" });
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+          const res = await fetch("https://frischly-server.onrender.com/api/auth/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+          if (res.ok) { 
+            const data = await res.json();
+            setUser(data.data.user);
+          }
+        } catch (err) {
+          console.error("Fetch error:", err);
+        }
+      }
+    };
+    checkLogin();
+  }, []);
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-      />
+  // Only render OrderComponent if both cart and user exist
+  if (!user || !cart) {
+    return null; // or a loading indicator
+  }
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Login</Text>}
-      </TouchableOpacity>
-
-      {responseData && (
-        <View style={styles.responseBox}>
-          <Text style={styles.responseTitle}>Response:</Text>
-          <Text>{JSON.stringify(responseData, null, 2)}</Text>
-        </View>
-      )}
-    </View>
-  );
+  return <OrderComponent items={cart} customer={user} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-    backgroundColor: "#f9f9f9",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-    backgroundColor: "#fff",
-  },
-  button: {
-    backgroundColor: "#007bff",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  responseBox: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: "#e3e3e3",
-    borderRadius: 8,
-  },
-  responseTitle: {
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-});

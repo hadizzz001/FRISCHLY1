@@ -76,6 +76,10 @@ const showHeader = !hideHeaderOn.includes(pathname)
                 options={{ headerShown: false }}
               />
               <Stack.Screen 
+                name="done"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen 
                 name="product/[id]"
                 options={{ headerShown: false }}
               />

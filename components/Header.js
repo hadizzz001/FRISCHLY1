@@ -6,7 +6,7 @@ export default function Header() {
   const router = useRouter();
   return (
     <View style={styles.topNav}>
-    <TouchableOpacity onPress={() => router.push("/test2")}>
+    <TouchableOpacity onPress={() => router.push("/(tabs)")}>
       <Image
         source={{
           uri: "https://res.cloudinary.com/dtzuor7no/image/upload/v1757762617/logo1_qjt9ff.webp",

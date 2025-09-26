@@ -13,7 +13,8 @@ import {
 } from "react-native";
 
 const Cart = () => {
-  const { cart, removeFromCart, quantities, subtotal, addToCart } = useCart();
+  const { cart, removeFromCart, quantities, subtotal, addToCart, calculatePriceDetails } = useCart();
+
   const [localQuantities, setLocalQuantities] = useState(quantities);
   const { isBooleanValue, setBooleanValue } = useBooleanValue();
   const navigation = useNavigation();
@@ -39,40 +40,42 @@ const Cart = () => {
       <Text style={styles.heading}>Your Shopping Bag</Text>
 
       <ScrollView style={styles.cartList}>
-        {cart && cart.length > 0 ? (
-          cart.map((obj) => (
-            <View key={obj._id} style={styles.cartItem}>
-              <Image source={{ uri: obj.picture }} style={styles.itemImage} />
+{cart && cart.length > 0 ? (
+  cart.map((obj) => {
+    const quantity = localQuantities[obj._id] || 1;
+    const priceDetails = calculatePriceDetails(obj, quantity);
 
+    return (
+      <View key={obj._id} style={styles.cartItem}>
+        <Image source={{ uri: obj.picture }} style={styles.itemImage} />
 
-              <View style={styles.details}>
-                <Text style={styles.itemTitle}>{obj.name}</Text>
+        <View style={styles.details}>
+          <Text style={styles.itemTitle}>{obj.name}</Text>
 
-                <View style={styles.quantityRow}>
-                  <Text style={styles.label}>Qty:{String(localQuantities[obj._id] || 1)}</Text>
-             
-                </View>
+          <View style={styles.quantityRow}>
+            <Text style={styles.label}>Qty: {String(quantity)}</Text>
+          </View>
 
-                <Text style={styles.price}>
-                  €{(obj.finalPrice * (localQuantities[obj._id] || 1)).toFixed(2)}
-                </Text>
-
-              </View>
-
-              {/* Close "X" Icon */}
-              <TouchableOpacity
-                style={styles.removeBtn}
-                onPress={() => handleRemoveFromCart(obj._id)}
-              >
-                <Ionicons name="trash" size={20} color="red" />
-              </TouchableOpacity>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.emptyText}>
-            You have no items in your shopping bag.
+          <Text style={styles.price}>
+            €{priceDetails.finalPrice.toFixed(2)}
           </Text>
-        )}
+        </View>
+
+        <TouchableOpacity
+          style={styles.removeBtn}
+          onPress={() => handleRemoveFromCart(obj._id)}
+        >
+          <Ionicons name="trash" size={20} color="red" />
+        </TouchableOpacity>
+      </View>
+    );
+  })
+) : (
+  <Text style={styles.emptyText}>
+    You have no items in your shopping bag.
+  </Text>
+)}
+
       </ScrollView>
 
       <View style={styles.footer}>
@@ -196,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   checkoutText: {
-    color: "#fff",
+    color: "#000",
     fontWeight: "bold",
   },
 });

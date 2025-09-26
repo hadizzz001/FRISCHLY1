@@ -167,53 +167,68 @@ export default function TabLayout() {
         )}
       </Tabs>
 
-      {/* Profile Overlay */}
-      {profileOpen && (
-        <View style={styles.profileOverlay}>
-          <TouchableOpacity style={styles.profileCloseBtn} onPress={() => setProfileOpen(false)}>
-            <Feather name="x" size={28} color="#000" />
-          </TouchableOpacity>
+{/* Profile Overlay */}
+{profileOpen && (
+  <View style={styles.profileOverlay}>
+    <TouchableOpacity style={styles.profileCloseBtn} onPress={() => setProfileOpen(false)}>
+      <Feather name="x" size={28} color="#000" />
+    </TouchableOpacity>
 
-          <ScrollView contentContainerStyle={styles.profileContent}>
-            <Text style={styles.profileTitle}>My Profile</Text>
-            {user ? (
-              <>
-                <Text style={styles.profileItem}>Name: {user.name}</Text>
-                <Text style={styles.profileItem}>Email: {user.email}</Text>
-                <Text style={styles.profileItem}>Phone: {user.phoneNumber}</Text>
-              </>
-            ) : (
-              <Text style={styles.profileItem}>Loading user...</Text>
-            )}
-
-            <TouchableOpacity
-              style={styles.profileRow}
-              onPress={async () => {
-                await AsyncStorage.removeItem("userData");
-                await AsyncStorage.setItem("guest", "false");
-                setProfileOpen(false);
-                router.replace("/start");
-              }}
-            >
-              <Feather name="log-out" size={20} color="red" style={{ marginRight: 6 }} />
-              <Text style={[styles.profileItem, { color: "red" }]}>Logout</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.profileRow}
-              onPress={async () => {
-                await AsyncStorage.removeItem("userData");
-                await AsyncStorage.setItem("guest", "false");
-                setProfileOpen(false);
-                router.replace("/start");
-              }}
-            >
-              <Feather name="trash-2" size={20} color="red" style={{ marginRight: 6 }} />
-              <Text style={[styles.profileItem, { color: "red" }]}>Request Delete Account</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+    <ScrollView contentContainerStyle={styles.profileContent}>
+      <Text style={styles.profileTitle}>My Profile</Text>
+      {user ? (
+        <>
+          <Text style={styles.profileItem}>Name: {user.name}</Text>
+          <Text style={styles.profileItem}>Email: {user.email}</Text>
+          <Text style={styles.profileItem}>Phone: {user.phoneNumber}</Text>
+        </>
+      ) : (
+        <Text style={styles.profileItem}>Guest</Text>
       )}
+
+      {/* Login / Logout Button */}
+      <TouchableOpacity
+        style={styles.profileRow}
+        onPress={async () => {
+          if (user) {
+            // Logout
+            await AsyncStorage.removeItem("userData");
+            setProfileOpen(false);
+            router.replace("/start");
+          } else {
+            // Navigate to login if guest
+            setProfileOpen(false);
+            router.replace("/start");
+          }
+        }}
+      >
+        <Feather
+          name={user ? "log-out" : "log-in"}
+          size={20}
+          color="red"
+          style={{ marginRight: 6 }}
+        />
+        <Text style={[styles.profileItem, { color: "red" }]}>{user ? "Logout" : "Login"}</Text>
+      </TouchableOpacity>
+
+      {/* Delete Account button only for logged-in users */}
+      {user && (
+        <TouchableOpacity
+          style={styles.profileRow}
+          onPress={async () => {
+            await AsyncStorage.removeItem("userData");
+            setProfileOpen(false);
+            router.replace("/start");
+          }}
+        >
+          <Feather name="trash-2" size={20} color="red" style={{ marginRight: 6 }} />
+          <Text style={[styles.profileItem, { color: "red" }]}>Request Delete Account</Text>
+        </TouchableOpacity>
+      )}
+    </ScrollView>
+  </View>
+)}
+
 
       {/* Menu Overlay */}
       {menuOpen && (

@@ -67,20 +67,9 @@ const calculatePriceDetails = (item, quantity = 1) => {
   // Step 2: tax
   const taxAmount = (afterDiscount * taxPercent) / 100;
 
-  // Step 3: final price
+  // Step 3: final price 
   const finalPrice = (afterDiscount + taxAmount + bottleRefund) * quantity;
-
-  // Log all details
-  console.log(`Price Calculation for "${item.name || item._id}":`);
-  console.log(`  Base Price: €${basePrice.toFixed(2)}`);
-  console.log(`  Discount: ${discountPercent}% (-€${discountAmount.toFixed(2)})`);
-  console.log(`  After Discount: €${afterDiscount.toFixed(2)}`);
-  console.log(`  Tax: ${taxPercent}% (+€${taxAmount.toFixed(2)})`);
-  console.log(`  Bottle Refund: +€${bottleRefund.toFixed(2)}`);
-  console.log(`  Quantity: ${quantity}`);
-  console.log(`  Final Price: €${finalPrice.toFixed(2)}`);
-  console.log('-----------------------------------');
-
+ 
   return {
     basePrice,
     discountPercent,
@@ -149,11 +138,18 @@ const calculatePriceDetails = (item, quantity = 1) => {
     });
   };
 
+ 
   // Clear cart
-  const clearCart = () => {
+const clearCart = async () => {
+  try {
     dispatch({ type: "CLEAR_CART" });
     setQuantities({});
-  };
+    await AsyncStorage.removeItem("cart");
+    await AsyncStorage.removeItem("quantities");
+  } catch (error) {
+    console.error("Error clearing cart:", error);
+  }
+};
 
   return (
     <CartContext.Provider

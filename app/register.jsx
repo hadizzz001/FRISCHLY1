@@ -2,6 +2,7 @@
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -19,10 +20,14 @@ import {
   View,
 } from 'react-native';
 
+
+
 // -------------------------
 // InputBox moved outside component to prevent focus loss
 // -------------------------
 const InputBox = ({ placeholder, value, onChangeText, secureTextEntry, keyboardType, inputBg, inputText, placeholderColor }) => (
+
+  
   <View
     style={{
       marginBottom: 12,
@@ -50,7 +55,9 @@ const InputBox = ({ placeholder, value, onChangeText, secureTextEntry, keyboardT
 export default function Register() {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const screenHeight = Dimensions.get('window').height;
+  const screenHeight = Dimensions.get('window').height; 
+const [zones, setZones] = useState([]);
+const [zipCode, setZipCode] = useState('');
 
   // -------------------------
   // States
@@ -62,8 +69,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
-  const [stateVal, setStateVal] = useState('');
-  const [zipCode, setZipCode] = useState('');
+  const [stateVal, setStateVal] = useState(''); 
   const [country, setCountry] = useState('');
   const [countryData, setCountryData] = useState(null);
 
@@ -74,6 +80,20 @@ export default function Register() {
     fetchCountry();
     checkLogin();
   }, []);
+
+  useEffect(() => {
+  const fetchZones = async () => {
+    try {
+      const res = await axios.get('https://frischly-server.onrender.com/api/zones?isActive=true');
+      if (res.data.success) {
+        setZones(res.data.data); // store the array of zones
+      }
+    } catch (error) {
+      console.log('Error fetching zones:', error.message);
+    }
+  };
+  fetchZones();
+}, []);
 
   const fetchCountry = async () => {
     try {
@@ -92,14 +112,14 @@ export default function Register() {
   const checkLogin = async () => {
     const userData = await AsyncStorage.getItem('userData');
     if (userData) router.replace('/tabs');
-  };
+  }; 
 
   // -------------------------
   // Register handler
   // -------------------------
   const handleRegister = async () => {
-    if (!name || !phone || !password) {
-      Alert.alert('Error', 'Name, phone and password are required');
+    if (!name || !phone || !password || !zipCode) {
+      Alert.alert('Error', 'Name, phone, zip code and password are required');
       return;
     }
 
@@ -234,8 +254,36 @@ export default function Register() {
           <InputBox placeholder="Street" value={street} onChangeText={setStreet} inputBg={inputBg} inputText={inputText} placeholderColor={placeholderColor} />
           <InputBox placeholder="City" value={city} onChangeText={setCity} inputBg={inputBg} inputText={inputText} placeholderColor={placeholderColor} />
           <InputBox placeholder="State" value={stateVal} onChangeText={setStateVal} inputBg={inputBg} inputText={inputText} placeholderColor={placeholderColor} />
-          <InputBox placeholder="Zip Code" value={zipCode} onChangeText={setZipCode} keyboardType="numeric" inputBg={inputBg} inputText={inputText} placeholderColor={placeholderColor} />
-          <InputBox placeholder="Country" value={country} onChangeText={setCountry} inputBg={inputBg} inputText={inputText} placeholderColor={placeholderColor} />
+<View
+  style={{
+    marginBottom: 12,
+    width: '100%',
+    minHeight: 55,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    backgroundColor: inputBg,
+    justifyContent: 'center',
+  }}
+>
+  <Picker
+    selectedValue={zipCode}
+    onValueChange={(itemValue) => setZipCode(itemValue)}
+    style={{ color: inputText }}
+  >
+    <Picker.Item label="Select Zip Code" value="" />
+    {zones.map((zone) => (
+      <Picker.Item
+        key={zone._id}
+        // display both zipCode and zoneName
+        label={`${zone.zipCode} — ${zone.zoneName}`}
+        value={zone.zipCode} // only save zipCode
+      />
+    ))}
+  </Picker>
+</View>
+
+<InputBox placeholder="Country" value={country} onChangeText={setCountry} inputBg={inputBg} inputText={inputText} placeholderColor={placeholderColor} />
 
           {/* Register Button */}
           <TouchableOpacity

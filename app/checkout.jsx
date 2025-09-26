@@ -1,18 +1,20 @@
 import { useCart } from '@/contexts/CartContext';
 import { Feather, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Picker } from '@react-native-picker/picker';
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import OrderComponent from "../components/CreateOrderButton";
 
 const CheckoutScreen = () => {
-  const { cart, removeFromCart, quantities, subtotal } = useCart();
+  const { cart, removeFromCart, quantities, subtotal, calculatePriceDetails } = useCart();
   const [localQuantities, setLocalQuantities] = useState(quantities);
-
-  const [deliveryFee, setDeliveryFee] = useState(subtotal > 50 ? 0 : 5);
+  const [deliveryFee, setDeliveryFee] = useState(0);
   const [total, setTotal] = useState((subtotal + deliveryFee).toFixed(2));
+  const [zones, setZones] = useState([]);
 
   const [country, setCountry] = useState('');
   const [cities, setCities] = useState([]);
@@ -21,134 +23,184 @@ const CheckoutScreen = () => {
   const router = useRouter();
   const token = Constants.expoConfig?.extra?.jwtToken || process.env.EXPO_PUBLIC_JWT_TOKEN;
 
-  const [inputs, setInputs] = useState({
-    name: "",
-    phone: "",
-    email: "",
+  // ✅ Unified state
+  const [state, setState] = useState({
+    loading: true,
+    user: null,
+    inputs: {
+      name: "",
+      email: "",
+      phone: "",
+      country: "",
+      state: "",
+      city: "",
+      zipCode: "",
+      street: "",
+    },
     country: "",
-    state: "",
-    city: "",
-    zipCode: "",
-    street: "",
   });
 
-  const [loading, setLoading] = useState(true);
 
-  // Fetch user info
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const res = await axios.get('https://frischly-server.onrender.com/api/zones?isActive=true');
+        if (res.data.success) {
+          setZones(res.data.data); // store array of zones
+        }
+      } catch (error) {
+        console.log('Error fetching zones:', error.message);
+      }
+    };
+    fetchZones();
+  }, []);
+
+
+  // Check login and fetch user
   useEffect(() => {
     const checkLogin = async () => {
       try {
         const userData = await AsyncStorage.getItem("userData");
         const guest = await AsyncStorage.getItem("guest");
 
-        if (!userData && !guest) { 
+        if (!userData && !guest) {
           router.replace("/start");
           return;
-        } 
- 
-if (userData) {
-  console.log("Entered 2 with data: " + userData);
-  const parsed = JSON.parse(userData);   // ✅ parse string
-  const user = parsed.user;              // ✅ extract actual user
-
-  setInputs({
-    name: user.name || "",
-    email: user.email || "",
-    phone: user.phoneNumber || "",
-    country: user.address?.country || "",
-    state: user.address?.state || "",
-    city: user.address?.city || "",
-    zipCode: user.address?.zipCode || "",
-    street: user.address?.street || "",
-  });
-
-  if (user.address?.country) {
-    setCountry(user.address.country);
-  }
-}
-
-
-        else if (guest) {
-          console.log("Entered");
-
-          // Guest → empty form
-          setInputs({
-            name: "",
-            email: "",
-            phone: "",
-            country: "",
-            state: "",
-            city: "",
-            zipCode: "",
-            street: "",
-          });
         }
 
+        if (userData) {
+          console.log("Found userData:", userData);
+          const parsedUser = JSON.parse(userData);
+          const token = parsedUser?.token;
+
+          if (!token) {
+            console.log("⚠️ No token, treating as guest");
+            setState(prev => ({ ...prev, loading: false }));
+            return;
+          }
+
+          const res = await fetch("https://frischly-server.onrender.com/api/auth/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const user = data.data.user;
+
+            setState(prev => ({
+              ...prev,
+              user,
+              inputs: {
+                name: user.name || "",
+                email: user.email || "",
+                phone: user.phoneNumber || "",
+                country: user.address?.country || "",
+                state: user.address?.state || "",
+                city: user.address?.city || "",
+                zipCode: user.address?.zipCode || "",
+                street: user.address?.street || "",
+              },
+              country: user.address?.country || "",
+              loading: false,
+            }));
+          } else {
+            console.log("⚠️ Failed to fetch user, treating as guest");
+            setState(prev => ({ ...prev, loading: false }));
+          }
+        } else if (guest) {
+          console.log("Guest mode enabled");
+          setState(prev => ({ ...prev, loading: false }));
+        }
       } catch (err) {
-        console.error("🔥 AsyncStorage error:", err);
-      } finally {
-        setLoading(false);
+        console.error("🔥 Error checking login:", err);
+        setState(prev => ({ ...prev, loading: false }));
       }
     };
 
     checkLogin();
-  }, []);
-
+  }, [router]);
 
   // Fetch country info
   useEffect(() => {
+    const fetchCountry = async () => {
+      try {
+        const res = await axios.get('https://ipwho.is/');
+        setCountry(res.data.country);
+        setCountryData({
+          code: res.data.country_code,
+          flag: `https://flagcdn.com/24x18/${res.data.country_code.toLowerCase()}.png`,
+          dial: `+${res.data.calling_code}`,
+        });
+      } catch (e) { }
+    };
     fetchCountry();
   }, []);
 
+  // Fetch cities for country
   useEffect(() => {
-    setDeliveryFee(subtotal > 50 ? 0 : 5);
-  }, [subtotal]);
+    if (state.country) {
+      const fetchCities = async () => {
+        try {
+          const res = await axios.post('https://countriesnow.space/api/v0.1/countries/cities', {
+            country: state.country,
+          });
+          setCities(res.data?.data || []);
+        } catch (e) {
+          setCities([]);
+        }
+      };
+      fetchCities();
+    }
+  }, [state.country]);
 
+  // Delivery fee fetch
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (!state.inputs.zipCode || state.inputs.zipCode.length < 4) {
+        setDeliveryFee(0);
+        return;
+      }
+      try {
+        const response = await fetch(
+          "https://frischly-server.onrender.com/api/zones/calculate-delivery",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ zipCode: state.inputs.zipCode }),
+          }
+        );
+        const data = await response.json();
+        if (data.success) {
+          setDeliveryFee(data.data.deliveryFee);
+        } else {
+          setDeliveryFee(0);
+        }
+      } catch (error) {
+        console.error("Delivery fetch error:", error);
+        setDeliveryFee(0);
+      }
+    };
+    fetchPrice();
+  }, [state.inputs.zipCode]);
+
+  // Update total
   useEffect(() => {
     setTotal((subtotal + deliveryFee).toFixed(2));
   }, [subtotal, deliveryFee]);
 
-  useEffect(() => {
-    if (country) {
-      fetchCities(country);
-      setInputs((prev) => ({ ...prev, country }));
-    }
-  }, [country]);
-
-  useEffect(() => {
-    if (subtotal > 50) setDeliveryFee(0);
-    else if (inputs.city?.trim().toLowerCase() === 'beirut') setDeliveryFee(3);
-    else setDeliveryFee(5);
-  }, [subtotal, inputs.city]);
-
-  const fetchCountry = async () => {
-    try {
-      const res = await axios.get('https://ipwho.is/');
-      setCountry(res.data.country);
-      setCountryData({
-        code: res.data.country_code,
-        flag: `https://flagcdn.com/24x18/${res.data.country_code.toLowerCase()}.png`,
-        dial: `+${res.data.calling_code}`,
-      });
-    } catch (e) { }
-  };
-
-  const fetchCities = async (country) => {
-    try {
-      const res = await axios.post('https://countriesnow.space/api/v0.1/countries/cities', { country });
-      setCities(res.data?.data || []);
-    } catch (e) {
-      setCities([]);
-    }
-  };
-
   const handleInput = (name, value) => {
-    setInputs((prev) => ({ ...prev, [name]: value }));
+    setState(prev => ({
+      ...prev,
+      inputs: { ...prev.inputs, [name]: value },
+    }));
   };
 
   const handleRemoveFromCart = (id) => removeFromCart(id);
 
-  if (loading) {
+  if (state.loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Loading user info...</Text>
@@ -156,11 +208,13 @@ if (userData) {
     );
   }
 
+  console.log("Cart contents:", cart);
+
   if (!cart || cart.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>You have no items in your shopping bag.</Text>
-        <TouchableOpacity style={styles.button} onPress={() => { }}>
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/shop")}>
           <Text style={styles.buttonText}>Continue shopping</Text>
         </TouchableOpacity>
       </View>
@@ -178,7 +232,7 @@ if (userData) {
       <TextInput
         style={styles.input}
         placeholder="Email (optional)"
-        value={inputs.email}
+        value={state.inputs.email}
         onChangeText={(v) => handleInput('email', v)}
         keyboardType="email-address"
       />
@@ -186,37 +240,60 @@ if (userData) {
       <TextInput
         style={styles.input}
         placeholder="Full Name *"
-        value={inputs.name}
+        value={state.inputs.name}
         onChangeText={(v) => handleInput('name', v)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Country *"
-        value={inputs.country}
+        value={state.inputs.country}
         editable={false}
       />
 
       <TextInput
         style={styles.input}
         placeholder="City *"
-        value={inputs.city}
+        value={state.inputs.city}
         onChangeText={(v) => handleInput('city', v)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="State / Region *"
-        value={inputs.state}
+        value={state.inputs.state}
         onChangeText={(v) => handleInput('state', v)}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="ZIP Code *"
-        value={inputs.zipCode}
-        onChangeText={(v) => handleInput('zipCode', v)}
+<View
+  style={{
+    marginBottom: 12,
+    width: '100%',
+    minHeight: 55,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+  }}
+>
+  <Picker
+    selectedValue={state.inputs.zipCode}
+    onValueChange={(itemValue) => handleInput("zipCode", itemValue)}
+    style={{ color: "#000" }}
+  >
+    <Picker.Item label="Select Zip Code" value="" />
+    {zones.map((zone) => (
+      <Picker.Item
+        key={zone._id}
+        label={`${zone.zipCode} — ${zone.zoneName}`} // display both
+        value={zone.zipCode} // only store zipCode
       />
+    ))}
+  </Picker>
+</View>
+
+
 
       <View style={styles.row}>
         {countryData.flag ? (
@@ -226,7 +303,7 @@ if (userData) {
         <TextInput
           style={[styles.input, { flex: 1 }]}
           placeholder="Phone *"
-          value={inputs.phone}
+          value={state.inputs.phone}
           keyboardType="phone-pad"
           onChangeText={(v) => handleInput('phone', v)}
         />
@@ -235,35 +312,34 @@ if (userData) {
       <TextInput
         style={styles.input}
         placeholder="Street *"
-        value={inputs.street}
+        value={state.inputs.street}
         onChangeText={(v) => handleInput('street', v)}
       />
-
 
       <Text style={styles.heading}>Order Summary</Text>
 
       <View>
-        {cart.map((item) => (
-          <View key={item._id} style={styles.cartItem}>
-            <Image
-              source={{
-                uri: item.picture.replace("/upload/", "/upload/q_50/"),
-              }}
-              style={styles.cartImage}
-              resizeMode="cover"
-            />
-            <View style={{ flex: 1 }}>
-              <Text>{item.title}</Text>
-              <Text>Qty: {localQuantities[item._id]}</Text>
-              <Text style={styles.price}>
-                €{(item.finalPrice * (localQuantities[item._id] || 1)).toFixed(2)}
-              </Text>
+        {cart.map((item) => {
+          const quantity = localQuantities[item._id] || 1;
+          const priceDetails = calculatePriceDetails(item, quantity);
+          return (
+            <View key={item._id} style={styles.cartItem}>
+              <Image
+                source={{ uri: item.picture.replace("/upload/", "/upload/q_50/") }}
+                style={styles.cartImage}
+                resizeMode="cover"
+              />
+              <View style={{ flex: 1 }}>
+                <Text>{item.title}</Text>
+                <Text>Qty: {quantity}</Text>
+                <Text style={styles.price}>€{priceDetails.finalPrice.toFixed(2)}</Text>
+              </View>
+              <TouchableOpacity onPress={() => handleRemoveFromCart(item._id)}>
+                <Ionicons name="trash" size={20} color="red" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => handleRemoveFromCart(item._id)}>
-              <Ionicons name="trash" size={20} color="red" />
-            </TouchableOpacity>
-          </View>
-        ))}
+          );
+        })}
       </View>
 
       <View style={styles.summaryRow}>
@@ -278,6 +354,8 @@ if (userData) {
         <Text style={{ fontWeight: 'bold' }}>Total</Text>
         <Text style={{ fontWeight: 'bold' }}>€{total}</Text>
       </View>
+
+      <OrderComponent items={cart} customer={state.user} />
     </ScrollView>
   );
 };
