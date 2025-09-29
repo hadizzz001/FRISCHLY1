@@ -75,6 +75,7 @@ export default function AccScreen() {
 				<View style={styles.infoCard}>
 					<Text style={styles.cardTitle}>Account Information</Text>
 
+					{/* Basic Information Section */}
 					<View style={styles.infoRow}>
 						<View style={styles.iconContainer}>
 							<Feather name="user" size={20} color="#FFC300" />
@@ -105,63 +106,68 @@ export default function AccScreen() {
 						</View>
 					</View>
 
-					<View style={styles.infoRow}>
-						<View style={styles.iconContainer}>
-							<Feather name="map-pin" size={20} color="#FFC300" />
-						</View>
-						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>Street</Text>
-							<Text style={styles.infoValue}>
-								{user.address?.street || "Not provided"}
-							</Text>
-						</View>
-					</View>
+					{/* Address Section */}
+					<View style={styles.addressSection}>
+						<Text style={styles.sectionTitle}>Address</Text>
 
-					<View style={styles.infoRow}>
-						<View style={styles.iconContainer}>
-							<Feather name="map" size={20} color="#FFC300" />
+						<View style={styles.infoRow}>
+							<View style={styles.iconContainer}>
+								<Feather name="map-pin" size={20} color="#FFC300" />
+							</View>
+							<View style={styles.infoContent}>
+								<Text style={styles.infoLabel}>Street</Text>
+								<Text style={styles.infoValue}>
+									{user.address?.street || "Not provided"}
+								</Text>
+							</View>
 						</View>
-						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>City</Text>
-							<Text style={styles.infoValue}>
-								{user.address?.city || "Not provided"}
-							</Text>
-						</View>
-					</View>
 
-					<View style={styles.infoRow}>
-						<View style={styles.iconContainer}>
-							<Feather name="navigation" size={20} color="#FFC300" />
+						<View style={styles.infoRow}>
+							<View style={styles.iconContainer}>
+								<Feather name="map" size={20} color="#FFC300" />
+							</View>
+							<View style={styles.infoContent}>
+								<Text style={styles.infoLabel}>City</Text>
+								<Text style={styles.infoValue}>
+									{user.address?.city || "Not provided"}
+								</Text>
+							</View>
 						</View>
-						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>State</Text>
-							<Text style={styles.infoValue}>
-								{user.address?.state || "Not provided"}
-							</Text>
-						</View>
-					</View>
 
-					<View style={styles.infoRow}>
-						<View style={styles.iconContainer}>
-							<Feather name="hash" size={20} color="#FFC300" />
+						<View style={styles.infoRow}>
+							<View style={styles.iconContainer}>
+								<Feather name="navigation" size={20} color="#FFC300" />
+							</View>
+							<View style={styles.infoContent}>
+								<Text style={styles.infoLabel}>State</Text>
+								<Text style={styles.infoValue}>
+									{user.address?.state || "Not provided"}
+								</Text>
+							</View>
 						</View>
-						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>Zip Code</Text>
-							<Text style={styles.infoValue}>
-								{user.address?.zipCode || "Not provided"}
-							</Text>
-						</View>
-					</View>
 
-					<View style={styles.infoRow}>
-						<View style={styles.iconContainer}>
-							<Feather name="globe" size={20} color="#FFC300" />
+						<View style={styles.infoRow}>
+							<View style={styles.iconContainer}>
+								<Feather name="hash" size={20} color="#FFC300" />
+							</View>
+							<View style={styles.infoContent}>
+								<Text style={styles.infoLabel}>Zip Code</Text>
+								<Text style={styles.infoValue}>
+									{user.address?.zipCode || "Not provided"}
+								</Text>
+							</View>
 						</View>
-						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>Country</Text>
-							<Text style={styles.infoValue}>
-								{user.address?.country || "Not provided"}
-							</Text>
+
+						<View style={styles.infoRow}>
+							<View style={styles.iconContainer}>
+								<Feather name="globe" size={20} color="#FFC300" />
+							</View>
+							<View style={styles.infoContent}>
+								<Text style={styles.infoLabel}>Country</Text>
+								<Text style={styles.infoValue}>
+									{user.address?.country || "Not provided"}
+								</Text>
+							</View>
 						</View>
 					</View>
 				</View>
@@ -360,6 +366,20 @@ const styles = StyleSheet.create({
 		fontWeight: "500",
 		marginTop: 2,
 		textAlign: "center",
+	},
+	addressSection: {
+		marginTop: 20,
+		paddingTop: 20,
+		borderTopWidth: 1,
+		borderTopColor: "#E0E0E0",
+	},
+	sectionTitle: {
+		fontSize: 18,
+		fontWeight: "700",
+		color: "#FFC300",
+		textAlign: "center",
+		marginBottom: 16,
+		letterSpacing: 1,
 	},
 	actionsContainer: {
 		paddingHorizontal: 20,

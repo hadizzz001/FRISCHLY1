@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
 import {
+	ActivityIndicator,
 	Alert,
 	Dimensions,
 	Image,
@@ -25,6 +26,7 @@ export default function Start() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const screenHeight = Dimensions.get("window").height;
 
@@ -44,6 +46,7 @@ export default function Start() {
 			return;
 		}
 
+		setLoading(true);
 		try {
 			// ✅ call login-profile instead of login
 			const res = await axios.post(
@@ -64,6 +67,8 @@ export default function Start() {
 		} catch (error) {
 			console.log("Login error", error.response?.data || error.message);
 			Alert.alert("Login Failed", "Invalid email or password");
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -179,8 +184,9 @@ export default function Start() {
 					{/* Login Button */}
 					<TouchableOpacity
 						onPress={handleLogin}
+						disabled={loading}
 						style={{
-							backgroundColor: "#ffc300",
+							backgroundColor: loading ? "#cccccc" : "#ffc300",
 							borderRadius: 15,
 							paddingVertical: 15,
 							width: "100%",
@@ -188,11 +194,15 @@ export default function Start() {
 							marginBottom: 12,
 						}}
 					>
-						<Text
-							style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18 }}
-						>
-							Login
-						</Text>
+						{loading ? (
+							<ActivityIndicator size="small" color="#000000" />
+						) : (
+							<Text
+								style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18 }}
+							>
+								Login
+							</Text>
+						)}
 					</TouchableOpacity>
 
 					<TouchableOpacity onPress={() => router.push("/register")}>
