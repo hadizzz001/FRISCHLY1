@@ -357,7 +357,7 @@ const CheckoutScreen = () => {
 						<View key={item._id} style={styles.cartItem}>
 							<Image
 								source={{
-									uri: item.picture.replace("/upload/", "/upload/q_50/"),
+									uri: item.picture.replace("/upload/", "/upload/"),
 								}}
 								style={styles.cartImage}
 								resizeMode="cover"

@@ -150,7 +150,7 @@ export default function ShopPage() {
 						<Image
 							source={{
 								uri:
-									item.picture?.replace("/upload/", "/upload/q_15/") ||
+									item.picture?.replace("/upload/", "/upload/") ||
 									"https://via.placeholder.com/150",
 							}}
 							style={styles.image}
