@@ -89,7 +89,7 @@ const ProductPage = () => {
 
 	const handleSubmit = () => {
 		addToCart(product, quantity);
-		setBooleanValue(!isBooleanValue);
+		// setBooleanValue(!isBooleanValue);
 	};
 
 	const toggleCart = () => setBooleanValue(!isBooleanValue);
@@ -177,15 +177,8 @@ const ProductPage = () => {
 				{/* Product Info */}
 				<View style={styles.info}>
 					<Text style={styles.title}>{name}</Text>
-					{subcategory?.name && (
-						<Text>
-							{parentCategory?.name} / {subcategory?.name}
-						</Text>
-					)}
-					<Text>{description}</Text>
-					<Text>Stock: {stockStatus}</Text>
-					{dimensions && <Text>Dimensions unit: {dimensions.unit}</Text>}
-					{weight && <Text>Weight unit: {weight.unit}</Text>}
+				 
+					<Text>{description}</Text> 
 
 					{/* Price Calculation */}
 					{(() => {
