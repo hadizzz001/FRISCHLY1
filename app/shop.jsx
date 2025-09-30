@@ -14,7 +14,6 @@ import {
 	ScrollView,
 	StyleSheet,
 	Text,
-	TextInput,
 	TouchableOpacity,
 	View,
 } from "react-native";
@@ -39,9 +38,6 @@ export default function ShopPage() {
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [categories, setCategories] = useState([]);
 	const [products, setProducts] = useState([]);
-	const [page, setPage] = useState(1);
-	const [hasNextPage, setHasNextPage] = useState(true);
-	const [isFetchingMore, setIsFetchingMore] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const { cart } = useCart();
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
@@ -106,7 +102,7 @@ export default function ShopPage() {
 				url += `&discount=true&minDiscount=${filters.minDiscount}`;
 
 			if (categoryParam) {
-				url += `&category=${categoryParam}`;
+				url = `https://frischly-server.onrender.com/api/products/category?categoryName=${categoryParam}`;
 			}
 
 			const res = await fetch(url);
@@ -119,25 +115,7 @@ export default function ShopPage() {
 			setHasNextPage(json.pagination.hasNextPage);
 		} catch (err) {
 			console.error(err);
-		} finally {
 			setLoading(false);
-			setIsFetchingMore(false);
-		}
-	};
-
-	// Initial load
-	useEffect(() => {
-		setPage(1);
-		fetchProducts(1);
-	}, [categoryParam, discountParam, searchParam]);
-
-	// Load more when reaching end
-	const loadMore = () => {
-		if (hasNextPage && !isFetchingMore) {
-			setIsFetchingMore(true);
-			const next = page + 1;
-			setPage(next);
-			fetchProducts(next);
 		}
 	};
 
@@ -203,7 +181,7 @@ export default function ShopPage() {
 								uri: item.picture || "https://via.placeholder.com/150",
 							}}
 							style={styles.image}
-							resizeMode="cover"
+							resizeMode="contain"
 						/>
 
 						{item.stock === 0 && (
@@ -314,10 +292,11 @@ export default function ShopPage() {
 				</TouchableOpacity>
 			</View>
 
+			{/* Products Grid */}
 			<FlatList
 				data={products}
-				renderItem={renderProduct}
 				keyExtractor={(item) => item._id}
+				renderItem={renderProduct}
 				numColumns={2}
 				onEndReached={loadMore}
 				onEndReachedThreshold={0.3}
