@@ -83,9 +83,9 @@ export default function DiscountCarousel() {
 			>
 				<View style={styles.imageWrapper}>
 					<Image
-						source={{
+						source={{ 
 							uri:
-								product.picture?.replace("/upload/", "/upload/") ||
+								product.picture ||
 								"https://via.placeholder.com/150",
 						}}
 						style={styles.image}

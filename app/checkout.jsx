@@ -7,13 +7,13 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-	Image,
-	ScrollView,
-	StyleSheet,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import OrderComponent from "../components/CreateOrderButton";
 
@@ -357,7 +357,7 @@ const CheckoutScreen = () => {
 						<View key={item._id} style={styles.cartItem}>
 							<Image
 								source={{
-									uri: item.picture.replace("/upload/", "/upload/"),
+									uri: item.picture,
 								}}
 								style={styles.cartImage}
 								resizeMode="cover"

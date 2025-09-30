@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-	ActivityIndicator,
-	Dimensions,
-	Image,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
+    ActivityIndicator,
+    Dimensions,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Feather from "react-native-vector-icons/Feather";
@@ -66,13 +66,13 @@ export default function CategoriesCarousel() {
 	const renderCategory = (category) => (
 		<TouchableOpacity
 			key={category._id}
-			onPress={() => router.push(`/category/${category._id}`)}
+			onPress={() => router.push(`/shop?category=${category.name}`)}
 			activeOpacity={0.8}
 			style={styles.card}
 		>
 			<View style={styles.imageWrapper}>
 				<Image
-					source={{ uri: category.image.replace("/upload/", "/upload/") }}
+					source={{ uri: category.image }}
 					style={styles.image}
 					resizeMode="cover"
 				/>

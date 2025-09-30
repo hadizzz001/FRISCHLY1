@@ -1,12 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import {
-	Dimensions,
-	FlatList,
-	Image,
-	Text,
-	TouchableOpacity,
-	View,
+    Dimensions,
+    FlatList,
+    Image,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const screenWidth = Dimensions.get("window").width;
@@ -57,7 +57,7 @@ const ResponsiveVideo = () => {
 				onPress={() => handleCategoryClick(item.name)}
 			>
 				<Image
-					source={{ uri: item.img[0].replace("/upload/", "/upload/") }}
+					source={{ uri: item.img[0] }}
 					style={{
 						width: "100%",
 						height: "100%",

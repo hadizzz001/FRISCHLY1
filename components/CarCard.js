@@ -106,7 +106,7 @@ const CarCard = ({ temp, index }) => {
 			<View style={styles.imageWrapper}>
 				<Image
 					source={{
-						uri: img[0].replace("/upload/", "/upload/"),
+						uri: img[0],
 					}}
 					style={styles.productImage}
 					resizeMode="contain"

@@ -161,11 +161,11 @@ const ProductPage = () => {
 						<View key={i} style={styles.slide}>
 							<TouchableOpacity
 								onPress={() =>
-									setZoomedImg(src.replace("/upload/", "/upload/"))
+									setZoomedImg(src)
 								}
 							>
 								<Image
-									source={{ uri: src.replace("/upload/", "/upload/") }}
+									source={{ uri: src }}
 									style={styles.swiperImage}
 									resizeMode="contain"
 								/>
@@ -259,30 +259,31 @@ const ProductPage = () => {
 			</ScrollView>
 
 			{/* Bottom Tab Bar */}
-			<View style={styles.tabBar}>
+			{/* <View style={styles.tabBar}>
 				<TouchableOpacity
 					style={styles.tabButton}
 					onPress={() => router.push("/")}
 				>
-					<Feather name="home" size={24} color="gray" />
+					<Feather name="home" size={24} color="#FFC300" />
 				</TouchableOpacity>
-				<TouchableOpacity
-					style={styles.tabButton}
-					onPress={() => setProfileOpen(true)}
-				>
-					<Feather name="user" size={24} color="gray" />
-				</TouchableOpacity>
+
 				<TouchableOpacity
 					style={styles.tabButton}
 					onPress={() => setMenuOpen(true)}
 				>
-					<Feather name="menu" size={24} color="gray" />
+					<Feather name="menu" size={24} color="#FFC300" />
 				</TouchableOpacity>
 				<TouchableOpacity style={styles.tabButton} onPress={toggleCart}>
-					<Feather name="shopping-cart" size={24} color="gray" />
+					<Feather name="shopping-cart" size={24} color="#FFC300" />
 					{cart?.length > 0 && <View style={styles.cartBadge} />}
 				</TouchableOpacity>
-			</View>
+								<TouchableOpacity
+					style={styles.tabButton}
+					onPress={() => setProfileOpen(true)}
+				>
+					<Feather name="user" size={24} color="#FFC300" />
+				</TouchableOpacity>
+			</View> */}
 
 			{/* Profile Overlay */}
 			{profileOpen && (
@@ -381,12 +382,12 @@ const ProductPage = () => {
 			{/* Cart Overlay */}
 			{isBooleanValue && (
 				<View style={styles.overlay}>
-					<TouchableOpacity
+					{/* <TouchableOpacity
 						style={styles.closeBtn}
 						onPress={() => setBooleanValue(false)}
 					>
 						<Feather name="x" size={28} color="#000" />
-					</TouchableOpacity>
+					</TouchableOpacity> */}
 					<Cart />
 				</View>
 			)}

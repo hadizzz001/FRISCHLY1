@@ -14,11 +14,14 @@ export default function AccScreen() {
 	const [user, setUser] = useState<any>(null);
 	const router = useRouter();
 
+	console.log("user data in acc.tsx:", user);
+	
+
 	useEffect(() => {
 		const checkLogin = async () => {
 			const userData = await AsyncStorage.getItem("userData");
 			const guest = await AsyncStorage.getItem("guest");
-
+ 
 			if (!userData && !guest) {
 				router.replace("/start");
 			} else {
@@ -29,7 +32,7 @@ export default function AccScreen() {
 					if (!token) {
 						console.error("⚠️ No token found in userData");
 						return;
-					}
+					}  
 
 					const res = await fetch(
 						"https://frischly-server.onrender.com/api/auth/me",
@@ -42,7 +45,7 @@ export default function AccScreen() {
 					);
 
 					if (res.ok) {
-						const data = await res.json();
+						const data = await res.json();  
 						setUser(data.data.user);
 					} else {
 						console.error("❌ Failed to fetch user:", res.status);
@@ -183,6 +186,31 @@ export default function AccScreen() {
 
 			{/* Action Buttons */}
 			<View style={styles.actionsContainer}>
+<TouchableOpacity
+  style={[
+    styles.actionButton,
+    styles.viewOrdersButton, // you can create a new style if needed
+  ]}
+  onPress={() => {
+    router.push("/order"); // change this to your actual orders page
+  }}
+>
+  <Feather
+    name="eye"
+    size={20}
+    color="#000000"
+    style={styles.buttonIcon}
+  />
+  <Text
+    style={[
+      styles.actionButtonText,
+      styles.viewOrdersText, // optional text style
+    ]}
+  >
+    View Orders
+  </Text>
+</TouchableOpacity>
+
 				<TouchableOpacity
 					style={[
 						styles.actionButton,
@@ -427,4 +455,12 @@ const styles = StyleSheet.create({
 	deleteText: {
 		color: "#FFFFFF",
 	},
+	viewOrdersButton: {
+  backgroundColor: "#FFC300", // example yellow or keep same style as others
+},
+
+viewOrdersText: {
+  color: "#000",
+},
+
 });

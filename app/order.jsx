@@ -2,15 +2,16 @@
 import { useCart } from '@/contexts/CartContext';
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from "expo-router";
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function TestOrder() {
@@ -19,7 +20,7 @@ export default function TestOrder() {
   const [loading, setLoading] = useState(true);
   const [expandedOrders, setExpandedOrders] = useState({});
   const [productImages, setProductImages] = useState({}); // ✅ Cache for product images
-
+	const router = useRouter();
   const { cart } = useCart();
 
   useEffect(() => {
@@ -134,16 +135,31 @@ export default function TestOrder() {
     setExpandedOrders(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.orderRow}>
-      <TouchableOpacity style={styles.orderHeader} onPress={() => toggleExpand(item._id)}>
-        <Text style={styles.orderId}>{item._id}</Text>
-        <Text style={styles.orderTotal}>${item.total.toFixed(2)}</Text>
-        <Text style={styles.arrow}>{expandedOrders[item._id] ? '▲' : '▼'}</Text>
-      </TouchableOpacity>
-      {expandedOrders[item._id] && renderOrderItem(item)}
-    </View>
-  );
+const renderItem = ({ item }) => (
+  <View style={styles.orderRow}>
+    <TouchableOpacity style={styles.orderHeader} onPress={() => toggleExpand(item._id)}>
+      <View style={{ flex: 2 }}>
+        <Text style={styles.orderId}>{item.orderNumber}</Text>
+      </View>
+
+      <View style={{ flex: 2 }}>
+        <Text>Subtotal: ${item.subtotal.toFixed(2)}</Text>
+        <Text>Delivery: ${item.delivery?.toFixed(2) || "0.00"}</Text>
+        <Text style={{ fontWeight: 'bold' }}>Total: ${(item.total).toFixed(2)}</Text>
+      </View>
+
+      <Feather
+        name={expandedOrders[item._id] ? "chevron-up" : "chevron-down"}
+        size={20}
+        color="#000"
+        style={{ flex: 0.5, textAlign: 'center' }}
+      />
+    </TouchableOpacity>
+
+    {expandedOrders[item._id] && renderOrderItem(item)}
+  </View>
+);
+
 
   return (
     <View style={styles.container}>

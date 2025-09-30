@@ -32,7 +32,8 @@ export default function Start() {
 
 	useEffect(() => {
 		const checkLogin = async () => {
-			const userData = await AsyncStorage.getItem("userData");
+			const userData = await AsyncStorage.getItem("userData"); 
+			
 			if (userData) {
 				router.replace("/(tabs)");
 			}

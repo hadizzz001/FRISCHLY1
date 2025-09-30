@@ -36,7 +36,7 @@ export default function MenuScreen() {
 					<TouchableOpacity
 						key={cat._id}
 						onPress={() => {
-							router.push(`/shop?category=${cat._id}`);
+							router.push(`/shop?category=${cat.name}`);
 						}}
 						style={styles.item}
 					>
