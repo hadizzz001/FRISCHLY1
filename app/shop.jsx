@@ -1,6 +1,7 @@
 "use client";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Picker } from "@react-native-picker/picker";
 import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
@@ -17,7 +18,6 @@ import {
 	View,
 } from "react-native";
 
-import Cart from "@/components/Cart";
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -42,6 +42,20 @@ export default function ShopPage() {
 	const { cart } = useCart();
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
 	const [user, setUser] = useState(null);
+	const [filterOpen, setFilterOpen] = useState(false);
+	const [subcategories, setSubcategories] = useState([]);
+	const searchParam = searchParams.search ?? "";
+	const [filters, setFilters] = useState({
+		search: searchParam,
+		subcategory: "",
+		shelfNumber: "",
+		sortBy: "price",
+		sortOrder: "asc",
+		priceRange: "1-20",
+		stockLevel: "",
+		discount: false,
+		minDiscount: 5,
+	});
 
 	const token =
 		Constants.expoConfig?.extra?.jwtToken || process.env.EXPO_PUBLIC_JWT_TOKEN;
@@ -56,34 +70,49 @@ export default function ShopPage() {
 			.catch((err) => console.error(err));
 	}, []);
 
-	// ✅ Fetch products (discount OR category)
-	const fetchProducts = async () => {
-		try {
-			let url = "https://frischly-server.onrender.com/api/products?limit=12";
-
-			// ✅ Discount products
-			if (discountParam === "true") {
+	useEffect(() => {
+		const getSubcategories = async () => {
+			try {
 				const res = await fetch(
-					"https://frischly-server.onrender.com/api/products?limit=1000"
+					"https://frischly-server.onrender.com/api/subcategories"
 				);
 				const json = await res.json();
-				const withDiscount = json.data.filter(
-					(item) => item.discount && item.discount > 0
-				);
-				setProducts(withDiscount.slice(0, 12));
-				setLoading(false);
-				return;
+				if (json.success) {
+					setSubcategories(json.data); // <-- only use the "data" array
+				}
+			} catch (err) {
+				console.error("Failed to fetch subcategories:", err);
 			}
+		};
 
-			// ✅ Category products
+		getSubcategories();
+	}, []);
+
+	const fetchProducts = async (nextPage = 1) => {
+		try {
+			let url = `https://frischly-server.onrender.com/api/products?page=${nextPage}&limit=12`;
+
+			if (filters.search) url += `&search=${filters.search}`;
+			if (filters.subcategory) url += `&subcategory=${filters.subcategory}`;
+			if (filters.sortBy)
+				url += `&sortBy=${filters.sortBy}&sortOrder=${filters.sortOrder}`;
+			if (filters.priceRange) url += `&priceRange=${filters.priceRange}`;
+			if (filters.stockLevel) url += `&stockLevel=${filters.stockLevel}`;
+			if (filters.discount)
+				url += `&discount=true&minDiscount=${filters.minDiscount}`;
+
 			if (categoryParam) {
 				url = `https://frischly-server.onrender.com/api/products/category?categoryName=${categoryParam}`;
 			}
 
 			const res = await fetch(url);
 			const json = await res.json();
-			setProducts(json.data || []);
-			setLoading(false);
+
+			// 👇 Append instead of replace
+			setProducts((prev) =>
+				nextPage === 1 ? json.data : [...prev, ...json.data]
+			);
+			setHasNextPage(json.pagination.hasNextPage);
 		} catch (err) {
 			console.error(err);
 			setLoading(false);
@@ -149,9 +178,7 @@ export default function ShopPage() {
 					<View style={styles.imageWrapper}>
 						<Image
 							source={{
-								uri:
-									item.picture?.replace("/upload/", "/upload/") ||
-									"https://via.placeholder.com/150",
+								uri: item.picture || "https://via.placeholder.com/150",
 							}}
 							style={styles.image}
 							resizeMode="contain"
@@ -256,6 +283,13 @@ export default function ShopPage() {
 						);
 					})}
 				</ScrollView>
+
+				<TouchableOpacity
+					style={[styles.categoryBtn, { backgroundColor: "#ddd" }]}
+					onPress={() => setFilterOpen(true)}
+				>
+					<Feather name="sliders" size={18} color="#000" />
+				</TouchableOpacity>
 			</View>
 
 			{/* Products Grid */}
@@ -264,146 +298,118 @@ export default function ShopPage() {
 				keyExtractor={(item) => item._id}
 				renderItem={renderProduct}
 				numColumns={2}
-				contentContainerStyle={{ paddingBottom: 100, ...styles.grid }}
+				onEndReached={loadMore}
+				onEndReachedThreshold={0.3}
+				ListFooterComponent={
+					isFetchingMore ? (
+						<ActivityIndicator size="small" color="#ffc300" />
+					) : null
+				}
 			/>
 
-			{/* Bottom Tabs */}
-			<View style={styles.tabBar}>
-				<TouchableOpacity
-					style={styles.tabButton}
-					onPress={() => router.push("/")}
-				>
-					<Feather name="home" size={24} color="gray" />
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={styles.tabButton}
-					onPress={() => setProfileOpen(true)}
-				>
-					<Feather name="user" size={24} color="gray" />
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={styles.tabButton}
-					onPress={() => setMenuOpen(true)}
-				>
-					<Feather name="menu" size={24} color="gray" />
-				</TouchableOpacity>
-
-				<TouchableOpacity style={styles.tabButton} onPress={toggleCart}>
-					<Feather name="shopping-cart" size={24} color="gray" />
-					{cart && cart.length > 0 && <View style={styles.cartBadge} />}
-				</TouchableOpacity>
-			</View>
-
-			{/* ✅ Profile Overlay */}
-			{profileOpen && (
-				<View style={styles.overlay}>
+			{/* ✅ Filter Overlay */}
+			{filterOpen && (
+				<View style={[styles.overlay, { left: width * 0.3 }]}>
+					{/* Close button */}
 					<TouchableOpacity
 						style={styles.closeBtn}
-						onPress={() => setProfileOpen(false)}
+						onPress={() => setFilterOpen(false)}
 					>
 						<Feather name="x" size={28} color="#000" />
 					</TouchableOpacity>
-					<ScrollView contentContainerStyle={styles.overlayContentProfile}>
-						<Text style={styles.title}>My Profile</Text>
-						{user ? (
-							<>
-								<Text style={styles.item}>Name: {user.name}</Text>
-								<Text style={styles.item}>Email: {user.email}</Text>
-								<Text style={styles.item}>Phone: {user.phoneNumber}</Text>
-							</>
-						) : (
-							<Text style={styles.item}>Loading user...</Text>
-						)}
 
-						{/* Logout */}
-						<TouchableOpacity
-							style={styles.row}
-							onPress={async () => {
-								await AsyncStorage.removeItem("userData");
-								await AsyncStorage.setItem("guest", "false");
-								setProfileOpen(false);
-								router.replace("/start");
-							}}
-						>
-							<Feather
-								name="log-out"
-								size={20}
-								color="red"
-								style={{ marginRight: 6 }}
-							/>
-							<Text style={[styles.item, { color: "red" }]}>Logout</Text>
-						</TouchableOpacity>
+					<ScrollView contentContainerStyle={{ padding: 20 }}>
+						<Text style={styles.title}>Filter Products</Text>
 
-						{/* Delete Account */}
-						<TouchableOpacity
-							style={styles.row}
-							onPress={async () => {
-								await AsyncStorage.removeItem("userData");
-								await AsyncStorage.setItem("guest", "false");
-								setProfileOpen(false);
-								router.replace("/start");
-							}}
-						>
-							<Feather
-								name="trash-2"
-								size={20}
-								color="red"
-								style={{ marginRight: 6 }}
-							/>
-							<Text style={[styles.item, { color: "red" }]}>
-								Request Delete Account
-							</Text>
-						</TouchableOpacity>
-					</ScrollView>
-				</View>
-			)}
+						{/* Search Field */}
+						<TextInput
+							placeholder="Search..."
+							value={filters.search}
+							onChangeText={(v) => setFilters((p) => ({ ...p, search: v }))}
+							style={styles.input}
+						/>
 
-			{/* ✅ Menu Overlay */}
-			{menuOpen && (
-				<View style={styles.overlay}>
-					<TouchableOpacity
-						style={styles.closeBtn}
-						onPress={() => setMenuOpen(false)}
-					>
-						<Feather name="x" size={28} color="#000" />
-					</TouchableOpacity>
-					<ScrollView contentContainerStyle={styles.overlayContentMenu}>
-						<Text style={styles.title}>Categories</Text>
-						{categories.slice(0, 8).map((cat) => (
-							<TouchableOpacity
-								key={cat._id}
-								onPress={() => {
-									setMenuOpen(false);
-									router.push(`/shop?category=${cat._id}`);
-								}}
+						{/* Subcategory Picker */}
+						<Text style={{ marginTop: 20, marginBottom: 5 }}>Subcategory</Text>
+						<View style={styles.input}>
+							<Picker
+								selectedValue={filters.subcategory}
+								onValueChange={(v) =>
+									setFilters((p) => ({ ...p, subcategory: v }))
+								}
 							>
-								<Text style={styles.item}>{cat.name}</Text>
-							</TouchableOpacity>
-						))}
+								<Picker.Item label="All Subcategories" value="" />
+								{subcategories.map((sub) => (
+									<Picker.Item
+										key={sub._id}
+										label={sub.name}
+										value={sub.name}
+									/>
+								))}
+							</Picker>
+						</View>
+
+						{/* Sort Order */}
 						<TouchableOpacity
+							onPress={() =>
+								setFilters((p) => ({
+									...p,
+									sortOrder: p.sortOrder === "asc" ? "desc" : "asc",
+								}))
+							}
+							style={styles.button}
+						>
+							<Text style={styles.buttonText}>Sort: {filters.sortOrder}</Text>
+						</TouchableOpacity>
+
+						{/* Discount Toggle */}
+						<TouchableOpacity
+							onPress={() =>
+								setFilters((p) => ({ ...p, discount: !p.discount }))
+							}
+							style={styles.checkboxRow}
+						>
+							<Text style={{ color: "#000" }}>Only Discounted</Text>
+							<View
+								style={[
+									styles.checkbox,
+									filters.discount && styles.checkboxActive,
+								]}
+							/>
+						</TouchableOpacity>
+
+						{/* Price Range Picker */}
+						<Text style={{ marginTop: 20, marginBottom: 5 }}>
+							Price Range (€)
+						</Text>
+						<View style={styles.input}>
+							<Picker
+								selectedValue={filters.priceRange}
+								onValueChange={(v) =>
+									setFilters((p) => ({ ...p, priceRange: v }))
+								}
+							>
+								<Picker.Item label="All Prices" value="" />
+								<Picker.Item label="€1 - €20" value="1-20" />
+								<Picker.Item label="€21 - €50" value="21-50" />
+								<Picker.Item label="€51 - €100" value="51-100" />
+								<Picker.Item label="€101 - €200" value="101-200" />
+								<Picker.Item label="€201+" value="201-10000" />
+							</Picker>
+						</View>
+
+						{/* Apply Filters Button */}
+						<TouchableOpacity
+							style={styles.button}
 							onPress={() => {
-								setMenuOpen(false);
-								router.push("/shop");
+								setFilterOpen(false);
+								setPage(1);
+								fetchProducts(1);
 							}}
 						>
-							<Text style={styles.item}>All Categories</Text>
+							<Text style={styles.buttonText}>Apply Filters</Text>
 						</TouchableOpacity>
 					</ScrollView>
-				</View>
-			)}
-
-			{/* ✅ Cart Overlay */}
-			{isBooleanValue && (
-				<View style={styles.overlay}>
-					<TouchableOpacity
-						style={styles.closeBtn}
-						onPress={() => setBooleanValue(false)}
-					>
-						<Feather name="x" size={28} color="#000" />
-					</TouchableOpacity>
-					<Cart />
 				</View>
 			)}
 		</View>
@@ -590,4 +596,39 @@ const styles = StyleSheet.create({
 	item: { fontSize: 16, marginVertical: 10, color: "#000" },
 	row: { flexDirection: "row", alignItems: "center", marginVertical: 8 },
 	title: { fontSize: 20, fontWeight: "bold", marginBottom: 8 },
+	button: {
+		backgroundColor: "#ffc300",
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		borderRadius: 8,
+		marginTop: 10,
+		alignItems: "center",
+	},
+	buttonText: {
+		color: "#000",
+		fontWeight: "bold",
+		fontSize: 16,
+	},
+	checkboxRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: "#ccc",
+		marginTop: 10,
+	},
+	checkbox: {
+		width: 20,
+		height: 20,
+		borderRadius: 4,
+		borderWidth: 2,
+		borderColor: "#000",
+	},
+	checkboxActive: {
+		backgroundColor: "#ffc300",
+		borderColor: "#ffc300",
+	},
 });

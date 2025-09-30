@@ -14,7 +14,7 @@ import Feather from "react-native-vector-icons/Feather";
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 2 - 20;
-const ITEM_HEIGHT = 280;
+const ITEM_HEIGHT = 200;
 
 export default function CategoriesCarousel() {
 	const router = useRouter();
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
 	imageWrapper: {
 		position: "relative",
 		width: "100%",
-		height: 150,
+		height: 100,
 		marginBottom: 6,
 		backgroundColor: "#f9f9f9",
 		justifyContent: "center",
