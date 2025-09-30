@@ -83,13 +83,13 @@ export default function DiscountCarousel() {
 			>
 				<View style={styles.imageWrapper}>
 					<Image
-						source={{ 
+						source={{
 							uri:
-								product.picture ||
+								product.picture?.replace("/upload/", "/upload/") ||
 								"https://via.placeholder.com/150",
 						}}
 						style={styles.image}
-						resizeMode="cover"
+						resizeMode="contain"
 					/>
 
 					{product.stock === 0 && (
@@ -162,6 +162,9 @@ const styles = StyleSheet.create({
 		width: "100%",
 		height: 150,
 		marginBottom: 6,
+		backgroundColor: "#f9f9f9",
+		justifyContent: "center",
+		alignItems: "center",
 	},
 	image: { width: "100%", height: "100%" },
 	overlay: {

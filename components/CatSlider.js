@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+	ActivityIndicator,
+	Dimensions,
+	Image,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Feather from "react-native-vector-icons/Feather";
@@ -74,7 +74,7 @@ export default function CategoriesCarousel() {
 				<Image
 					source={{ uri: category.image }}
 					style={styles.image}
-					resizeMode="cover"
+					resizeMode="contain"
 				/>
 			</View>
 			<Text style={styles.name} numberOfLines={2}>
@@ -131,6 +131,9 @@ const styles = StyleSheet.create({
 		width: "100%",
 		height: 150,
 		marginBottom: 6,
+		backgroundColor: "#f9f9f9",
+		justifyContent: "center",
+		alignItems: "center",
 	},
 	image: { width: "100%", height: "100%", borderRadius: 8 },
 	name: { fontSize: 14, fontWeight: "500", color: "#333", textAlign: "center" },
