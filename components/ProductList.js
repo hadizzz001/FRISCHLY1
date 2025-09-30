@@ -128,7 +128,7 @@ export default function ShopPage() {
 									 			"https://via.placeholder.com/150",
 										}}
 										style={styles.image}
-										resizeMode="cover"
+										resizeMode="contain"
 									/>
 									{item.stock === 0 && (
 										<View style={styles.outOfStockOverlay}>
@@ -181,6 +181,9 @@ const styles = StyleSheet.create({
 		width: "100%",
 		height: 150,
 		marginBottom: 6,
+		backgroundColor: "#f9f9f9",
+		justifyContent: "center",
+		alignItems: "center",
 	},
 	image: { width: "100%", height: "100%" },
 	outOfStockOverlay: {
