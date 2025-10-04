@@ -12,16 +12,14 @@ import {
 
 export default function AccScreen() {
 	const [user, setUser] = useState<any>(null);
-	const router = useRouter();
+	const router = useRouter(); 
 
-	console.log("user data in acc.tsx:", user);
-	
 
 	useEffect(() => {
 		const checkLogin = async () => {
 			const userData = await AsyncStorage.getItem("userData");
 			const guest = await AsyncStorage.getItem("guest");
- 
+
 			if (!userData && !guest) {
 				router.replace("/start");
 			} else {
@@ -32,7 +30,7 @@ export default function AccScreen() {
 					if (!token) {
 						console.error("⚠️ No token found in userData");
 						return;
-					}  
+					}
 
 					const res = await fetch(
 						"https://frischly-server.onrender.com/api/auth/me",
@@ -45,7 +43,7 @@ export default function AccScreen() {
 					);
 
 					if (res.ok) {
-						const data = await res.json();  
+						const data = await res.json();
 						setUser(data.data.user);
 					} else {
 						console.error("❌ Failed to fetch user:", res.status);
@@ -184,86 +182,85 @@ export default function AccScreen() {
 				</View>
 			)}
 
-			{/* Action Buttons */}
-			<View style={styles.actionsContainer}>
-<TouchableOpacity
-  style={[
-    styles.actionButton,
-    styles.viewOrdersButton, // you can create a new style if needed
-  ]}
-  onPress={() => {
-    router.push("/order"); // change this to your actual orders page
-  }}
->
-  <Feather
-    name="eye"
-    size={20}
-    color="#000000"
-    style={styles.buttonIcon}
-  />
-  <Text
-    style={[
-      styles.actionButtonText,
-      styles.viewOrdersText, // optional text style
-    ]}
-  >
-    View Orders
-  </Text>
-</TouchableOpacity>
+{/* Action Buttons */}
+<View style={styles.actionsContainer}>
 
-				<TouchableOpacity
-					style={[
-						styles.actionButton,
-						user ? styles.logoutButton : styles.loginButton,
-					]}
-					onPress={async () => {
-						if (user) {
-							// Logout
-							await AsyncStorage.removeItem("userData");
-							router.replace("/start");
-						} else {
-							// Navigate to login if guest
-							router.replace("/start");
-						}
-					}}
-				>
-					<Feather
-						name={user ? "log-out" : "log-in"}
-						size={20}
-						color={user ? "#000000" : "#000000"}
-						style={styles.buttonIcon}
-					/>
-					<Text
-						style={[
-							styles.actionButtonText,
-							user ? styles.logoutText : styles.loginText,
-						]}
-					>
-						{user ? "Logout" : "Login"}
-					</Text>
-				</TouchableOpacity>
+	{user && (
+	<>
+		{/* Row with Edit & Change Password */}
+		<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+			<TouchableOpacity
+				style={[styles.actionButton, styles.loginButton, { flex: 1, marginRight: 4 }]}
+				onPress={() => router.push("/edit-profile")}
+			>
+				<Feather name="edit" size={20} color="#000" style={styles.buttonIcon} />
+				<Text style={styles.actionButtonText}>Edit Profile</Text>
+			</TouchableOpacity>
 
-				{/* Delete Account button only for logged-in users */}
-				{user && (
-					<TouchableOpacity
-						style={[styles.actionButton, styles.deleteButton]}
-						onPress={async () => {
-							await AsyncStorage.removeItem("userData");
-							router.replace("/start");
-						}}
-					>
-						<Feather
-							name="trash-2"
-							size={20}
-							color="#FFFFFF"
-							style={styles.buttonIcon}
-						/>
-						<Text style={[styles.actionButtonText, styles.deleteText]}>
-							Delete Account
-						</Text>
-					</TouchableOpacity>
-				)}
-			</View>
+			<TouchableOpacity
+				style={[styles.actionButton, styles.loginButton, { flex: 1, marginLeft: 4 }]}
+				onPress={() => router.push("/changepass")}
+			>
+				<Feather name="lock" size={20} color="#000" style={styles.buttonIcon} />
+				<Text style={styles.actionButtonText}>Change Password</Text>
+			</TouchableOpacity>
+		</View>
+	</>
+)}
+
+
+	{user && (
+ 
+	<TouchableOpacity
+		style={[styles.actionButton, styles.loginButton]} // Same as login/logout
+		onPress={() => router.push("/order")}
+	>
+		<Feather name="eye" size={20} color="#000" style={styles.buttonIcon} />
+		<Text style={styles.actionButtonText}>View Orders</Text>
+	</TouchableOpacity>
+ 
+
+	)}
+
+	{/* Logout / Login Button */}
+	<TouchableOpacity
+		style={[
+			styles.actionButton,
+			user ? styles.logoutButton : styles.loginButton,
+		]}
+		onPress={async () => {
+			await AsyncStorage.removeItem("userData");
+			router.replace("/start");
+		}}
+	>
+		<Feather
+			name={user ? "log-out" : "log-in"}
+			size={20}
+			color="#000"
+			style={styles.buttonIcon}
+		/>
+		<Text style={[styles.actionButtonText, styles.logoutText]}>
+			{user ? "Logout" : "Login"}
+		</Text>
+	</TouchableOpacity>
+
+	{/* Delete Account */}
+	{user && (
+		<TouchableOpacity
+			style={[styles.actionButton, styles.deleteButton]}
+			onPress={async () => {
+				await AsyncStorage.removeItem("userData");
+				router.replace("/start");
+			}}
+		>
+			<Feather name="trash-2" size={20} color="#fff" style={styles.buttonIcon} />
+			<Text style={[styles.actionButtonText, styles.deleteText]}>
+				Delete Account
+			</Text>
+		</TouchableOpacity>
+	)}
+</View>
+
 		</ScrollView>
 	);
 }
@@ -456,11 +453,40 @@ const styles = StyleSheet.create({
 		color: "#FFFFFF",
 	},
 	viewOrdersButton: {
-  backgroundColor: "#FFC300", // example yellow or keep same style as others
+		backgroundColor: "#FFC300", // example yellow or keep same style as others
+	},
+
+	viewOrdersText: {
+		color: "#000",
+	},
+
+	rowActions: {
+	flexDirection: "row",
+	justifyContent: "space-between",
+	marginBottom: 16,
 },
 
-viewOrdersText: {
-  color: "#000",
+actionButtonSmall: {
+	flexDirection: "row",
+	alignItems: "center",
+	justifyContent: "center",
+	paddingVertical: 12,
+	paddingHorizontal: 14,
+	borderRadius: 10,
+	flex: 1,
+	marginHorizontal: 4,
+	backgroundColor: "#FFC300",
+	shadowColor: "#000",
+	shadowOffset: { width: 0, height: 2 },
+	shadowOpacity: 0.1,
+	shadowRadius: 4,
+	elevation: 3,
 },
+
+actionButtonTextSmall: {
+	fontSize: 14,
+	fontWeight: "600",
+},
+
 
 });

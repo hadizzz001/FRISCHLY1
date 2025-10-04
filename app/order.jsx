@@ -5,13 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 export default function TestOrder() {
@@ -140,6 +140,14 @@ const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.orderHeader} onPress={() => toggleExpand(item._id)}>
       <View style={{ flex: 2 }}>
         <Text style={styles.orderId}>{item.orderNumber}</Text>
+ <Text style={[styles.status, 
+ item.status === 'delivered' ? styles.statusDelivered :
+ item.status === 'shipped' ? styles.statusShipped :
+ item.status === 'cancelled' ? styles.statusCancelled :
+ styles.statusPending
+ ]}>
+ {item.status || "Pending"} 
+ </Text>
       </View>
 
       <View style={{ flex: 2 }}>

@@ -82,8 +82,7 @@ const CheckoutScreen = () => {
 					return;
 				}
 
-				if (userData) {
-					console.log("Found userData:", userData);
+				if (userData) { 
 					const parsedUser = JSON.parse(userData);
 					const token = parsedUser?.token;
 
@@ -228,8 +227,7 @@ const CheckoutScreen = () => {
 		);
 	}
 
-	console.log("Cart contents:", cart);
-
+ 
 	if (!cart || cart.length === 0) {
 		return (
 			<View style={styles.emptyContainer}>

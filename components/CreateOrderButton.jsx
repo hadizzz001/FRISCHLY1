@@ -1,15 +1,73 @@
 'use client';
+import PaymentForm from "@/components/AddCardScreen"; // <-- Import PaymentForm
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function OrderComponent({ items, customer }) {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const router = useRouter(); 
+
+  const [existingCard, setExistingCard] = useState(null);
+  const [validatePayment, setValidatePayment] = useState(null); // <-- This receives validation function from PaymentForm
+
+
+   useEffect(() => {
+    const fetchUserCard = async () => {
+      const stored = await AsyncStorage.getItem("userData");
+      if (!stored) return;
+      const { token } = JSON.parse(stored);
+
+      const res = await fetch("https://frischly-server.onrender.com/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+ 
+      if (res.ok) {
+        const data = await res.json();
+        setExistingCard(data?.data?.user?.creditCard || null);
+      }
+    };
+
+    fetchUserCard();
+  }, []);
+
+
+   const deleteCard = async () => {
+    const stored = await AsyncStorage.getItem("userData");
+    const { token } = JSON.parse(stored);
+
+    const res = await fetch("https://frischly-server.onrender.com/api/auth/profile", {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ creditCard: {} }), // <-- Clear card
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      Alert.alert("✅ Card removed!");
+      setExistingCard(null);
+    } else {
+      Alert.alert("❌ Failed to delete card");
+    }
+  };
 
   const handlePayNow = async () => {
-    console.log("Pay Now button clicked");
+if (!validatePayment) return;
+
+    const { isValid, errors, values } = validatePayment();
+
+    if (!isValid) {
+      console.log("❌ Payment form invalid:", errors);
+      alert(Object.values(errors).join("\n"));
+      return;
+    }
+
+    console.log("✅ Payment valid, proceeding with order...", values);
+ 
 
     if (!items || !customer) {
       console.log("No items or customer provided, exiting...");
@@ -77,7 +135,7 @@ export default function OrderComponent({ items, customer }) {
       console.log("Order created successfully:", data);
 
       // ✅ Navigate to "done" page after success
-      router.push("/done");
+      // router.push("/done");
 
     } catch (error) {
       console.error("Error creating order:", error);
@@ -87,17 +145,42 @@ export default function OrderComponent({ items, customer }) {
   };
 
   return (
-    <TouchableOpacity
+<>
+    <View  style={{ marginTop: 20, marginBottom: 20 }}>
+      {existingCard ? (
+        <View style={{ padding: 15, borderWidth: 1, borderRadius: 10 }}>
+          <Text>Saved Card: {existingCard.cardNumber}</Text>
+         
+<TouchableOpacity
+  onPress={deleteCard}
+  style={{
+    backgroundColor: "transparent",
+    color: "red",
+    paddingVertical: 12,
+    paddingHorizontal: 20, 
+    alignItems: 'center',
+    marginTop: 10,
+  }}
+>
+  <Text style={{ color: 'red', fontWeight: 'bold' }}>Use Another Card</Text>
+</TouchableOpacity>
+        </View>
+      ) : (
+        <PaymentForm onValidate={setValidatePayment} />
+      )}
+    </View>
+    {/* <TouchableOpacity
       style={styles.button}
       onPress={handlePayNow}
       disabled={loading}
     >
       {loading ? (
         <ActivityIndicator color="#fff" />
-      ) : (
-        <Text style={styles.buttonText}>Pay Now</Text>
+      ) : ( 
+        <Text style={styles.buttonText}>Pay Now</Text> 
       )}
-    </TouchableOpacity>
+    </TouchableOpacity> */}
+    </>
   );
 }
 

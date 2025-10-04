@@ -45,6 +45,10 @@ export default function ShopPage() {
 	const [filterOpen, setFilterOpen] = useState(false);
 	const [subcategories, setSubcategories] = useState([]);
 	const searchParam = searchParams.search ?? "";
+	const [page, setPage] = useState(1);
+const [hasNextPage, setHasNextPage] = useState(true);
+const [isFetchingMore, setIsFetchingMore] = useState(false);
+
 	const [filters, setFilters] = useState({
 		search: searchParam,
 		subcategory: "",
@@ -157,6 +161,18 @@ export default function ShopPage() {
 		};
 		checkLogin();
 	}, []);
+
+	const loadMore = () => {
+  if (!hasNextPage || isFetchingMore) return; // prevent double fetching
+  setIsFetchingMore(true);
+  const nextPage = page + 1;
+
+  fetchProducts(nextPage).then(() => {
+    setPage(nextPage);
+    setIsFetchingMore(false);
+  });
+};
+
 
 	const renderProduct = ({ item }) => {
 		const basePrice = item.price || 0;

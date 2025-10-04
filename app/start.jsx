@@ -73,9 +73,11 @@ export default function Start() {
 		}
 	};
 
-	const inputBg = colorScheme === "dark" ? "#000000" : "#FFFFFF";
-	const inputText = colorScheme === "dark" ? "#FFFFFF" : "#000000";
-	const placeholderColor = colorScheme === "dark" ? "#000000" : "#000000";
+ 
+const inputBg = "#FFFFFF";
+const inputText = "#000000";
+const placeholderColor = "#666666";
+
 
 	return (
 		<KeyboardAvoidingView

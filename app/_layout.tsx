@@ -70,6 +70,7 @@ export default function RootLayout() {
 							<Stack.Screen name="shop" options={{ headerShown: false }} />
 							<Stack.Screen name="checkout" options={{ headerShown: false }} />
 							<Stack.Screen name="order" options={{ headerShown: false }} />
+							<Stack.Screen name="edit-profile" options={{ headerShown: false }} />
 							<Stack.Screen name="done" options={{ headerShown: false }} />
 							<Stack.Screen
 								name="product/[id]"
