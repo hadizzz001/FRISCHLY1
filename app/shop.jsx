@@ -14,6 +14,7 @@ import {
 	ScrollView,
 	StyleSheet,
 	Text,
+	TextInput,
 	TouchableOpacity,
 	View,
 } from "react-native";
@@ -46,8 +47,8 @@ export default function ShopPage() {
 	const [subcategories, setSubcategories] = useState([]);
 	const searchParam = searchParams.search ?? "";
 	const [page, setPage] = useState(1);
-const [hasNextPage, setHasNextPage] = useState(true);
-const [isFetchingMore, setIsFetchingMore] = useState(false);
+	const [hasNextPage, setHasNextPage] = useState(true);
+	const [isFetchingMore, setIsFetchingMore] = useState(false);
 
 	const [filters, setFilters] = useState({
 		search: searchParam,
@@ -163,16 +164,15 @@ const [isFetchingMore, setIsFetchingMore] = useState(false);
 	}, []);
 
 	const loadMore = () => {
-  if (!hasNextPage || isFetchingMore) return; // prevent double fetching
-  setIsFetchingMore(true);
-  const nextPage = page + 1;
+		if (!hasNextPage || isFetchingMore) return; // prevent double fetching
+		setIsFetchingMore(true);
+		const nextPage = page + 1;
 
-  fetchProducts(nextPage).then(() => {
-    setPage(nextPage);
-    setIsFetchingMore(false);
-  });
-};
-
+		fetchProducts(nextPage).then(() => {
+			setPage(nextPage);
+			setIsFetchingMore(false);
+		});
+	};
 
 	const renderProduct = ({ item }) => {
 		const basePrice = item.price || 0;
