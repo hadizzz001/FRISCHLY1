@@ -31,7 +31,7 @@ export default function RootLayout() {
 		const fetchCategories = async () => {
 			try {
 				const res = await fetch(
-					"https://frischly-server.onrender.com/api/categories"
+					"https://frischlyshop-server.onrender.com/api/categories"
 				);
 				const data = await res.json();
 				setCategories(data);
@@ -68,6 +68,7 @@ export default function RootLayout() {
 							<Stack.Screen name="start" options={{ headerShown: false }} />
 							<Stack.Screen name="register" options={{ headerShown: false }} />
 							<Stack.Screen name="shop" options={{ headerShown: false }} />
+							<Stack.Screen name="shop1" options={{ headerShown: false }} />
 							<Stack.Screen name="checkout" options={{ headerShown: false }} />
 							<Stack.Screen name="order" options={{ headerShown: false }} />
 							<Stack.Screen name="edit-profile" options={{ headerShown: false }} />

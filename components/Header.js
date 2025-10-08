@@ -14,7 +14,7 @@ export default function Header() {
 
   return (
     <View style={styles.topNav}>
-      <TouchableOpacity onPress={() => router.push("/test2")}>
+      <TouchableOpacity onPress={() => router.push("/")}>
       {/* <TouchableOpacity onPress={() => router.push("/(tabs)")}> */}
         <Image
           source={{

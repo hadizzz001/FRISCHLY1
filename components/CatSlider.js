@@ -3,20 +3,20 @@ import { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	Dimensions,
+	FlatList,
 	Image,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from "react-native";
-import Carousel from "react-native-reanimated-carousel";
 import Feather from "react-native-vector-icons/Feather";
 
 const { width } = Dimensions.get("window");
-const ITEM_WIDTH = width / 2 - 20;
-const ITEM_HEIGHT = 200;
+const ITEM_WIDTH = width / 4 - 15; // 4 items per row
+const ITEM_HEIGHT = 130;
 
-export default function CategoriesCarousel() {
+export default function CategoriesGrid() {
 	const router = useRouter();
 	const [categories, setCategories] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export default function CategoriesCarousel() {
 		const fetchCategories = async () => {
 			try {
 				const res = await fetch(
-					"https://frischly-server.onrender.com/api/categories?limit=1000"
+					"https://frischlyshop-server.onrender.com/api/categories?limit=1000"
 				);
 				const json = await res.json();
 				setCategories(json.data || []);
@@ -53,17 +53,7 @@ export default function CategoriesCarousel() {
 		);
 	}
 
-	// Limit to 5 items
-	const limitedCategories = categories.slice(0, 6);
-
-	// Group 2 items per slide
-	const groupedData = [];
-	for (let i = 0; i < limitedCategories.length; i += 2) {
-		groupedData.push(limitedCategories.slice(i, i + 2));
-	}
-
-	// Render each category
-	const renderCategory = (category) => (
+	const renderCategory = ({ item: category }) => (
 		<TouchableOpacity
 			key={category._id}
 			onPress={() => router.push(`/shop?category=${category.name}`)}
@@ -84,9 +74,7 @@ export default function CategoriesCarousel() {
 	);
 
 	return (
-		<View
-			style={{ height: ITEM_HEIGHT, marginTop: 30, backgroundColor: "#fff" }}
-		>
+		<View style={{ backgroundColor: "#fff", marginTop: 30, paddingBottom: 20 }}>
 			<View style={styles.header}>
 				<Text style={styles.headerText}>Shop by Category</Text>
 				<View style={styles.headerRight}>
@@ -102,41 +90,43 @@ export default function CategoriesCarousel() {
 				</View>
 			</View>
 
-			<Carousel
-				loop
-				autoPlayInterval={2000}
-				width={ITEM_WIDTH * 2 + 10}
-				height={ITEM_HEIGHT}
-				data={groupedData}
-				scrollAnimationDuration={800}
-				renderItem={({ item }) => (
-					<View style={{ flexDirection: "row" }}>
-						{item.map(renderCategory)}
-					</View>
-				)}
+			<FlatList
+				data={categories}
+				renderItem={renderCategory}
+				keyExtractor={(item) => item._id}
+				numColumns={4}
+				contentContainerStyle={styles.gridContainer}
 			/>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
+	gridContainer: {
+		paddingHorizontal: 8,
+	},
 	card: {
 		width: ITEM_WIDTH,
 		margin: 5,
 		backgroundColor: "transparent",
-		padding: 8,
+		alignItems: "center",
 	},
 	imageWrapper: {
-		position: "relative",
 		width: "100%",
-		height: 100,
-		marginBottom: 6,
+		height: 80,
 		backgroundColor: "#f9f9f9",
 		justifyContent: "center",
 		alignItems: "center",
+		borderRadius: 8,
+		marginBottom: 6,
 	},
 	image: { width: "100%", height: "100%", borderRadius: 8 },
-	name: { fontSize: 14, fontWeight: "500", color: "#333", textAlign: "center" },
+	name: {
+		fontSize: 12,
+		fontWeight: "500",
+		color: "#333",
+		textAlign: "center",
+	},
 	header: {
 		flexDirection: "row",
 		justifyContent: "space-between",

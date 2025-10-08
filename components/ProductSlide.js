@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-	ActivityIndicator,
-	Dimensions,
-	Image,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
+    ActivityIndicator,
+    Dimensions,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Feather from "react-native-vector-icons/Feather";
@@ -25,7 +25,7 @@ export default function DiscountCarousel() {
 		const fetchDiscountProducts = async () => {
 			try {
 				const res = await fetch(
-					"https://frischly-server.onrender.com/api/products?limit=1000"
+					"https://frischlyshop-server.onrender.com/api/products?limit=1000"
 				);
 				const json = await res.json();
 				const withDiscount = json.data.filter(

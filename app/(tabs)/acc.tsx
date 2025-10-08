@@ -3,11 +3,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-	ScrollView,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function AccScreen() {
@@ -33,7 +33,7 @@ export default function AccScreen() {
 					}
 
 					const res = await fetch(
-						"https://frischly-server.onrender.com/api/auth/me",
+						"https://frischlyshop-server.onrender.com/api/auth/me",
 						{
 							headers: {
 								Authorization: `Bearer ${token}`,

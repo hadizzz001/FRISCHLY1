@@ -36,7 +36,7 @@ export default function TestOrder() {
         if (!token) return;
 
         // Fetch user info
-        const meRes = await fetch("https://frischly-server.onrender.com/api/auth/me", {
+        const meRes = await fetch("https://frischlyshop-server.onrender.com/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export default function TestOrder() {
         }
 
         // Fetch orders
-        const ordersRes = await fetch("https://frischly-server.onrender.com/api/orders", {
+        const ordersRes = await fetch("https://frischlyshop-server.onrender.com/api/orders", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export default function TestOrder() {
     if (productImages[productId]) return productImages[productId]; // ✅ Cached version
 
     try {
-      const res = await fetch(`https://frischly-server.onrender.com/api/products/${productId}`);
+      const res = await fetch(`https://frischlyshop-server.onrender.com/api/products/${productId}`);
       const data = await res.json();
       const img = data?.data?.picture || null;
 

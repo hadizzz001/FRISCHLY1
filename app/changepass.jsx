@@ -65,7 +65,7 @@ export default function ChangePassword() {
       if (!token) return Alert.alert("Error", "User not authenticated");
 
       const res = await axios.put(
-        "https://frischly-server.onrender.com/api/auth/change-password",
+        "https://frischlyshop-server.onrender.com/api/auth/change-password",
         { currentPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
       );

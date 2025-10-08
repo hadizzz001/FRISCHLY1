@@ -18,9 +18,8 @@ import {
 import OrderComponent from "../components/CreateOrderButton";
 
 const CheckoutScreen = () => {
-	const { cart, removeFromCart, quantities, subtotal, calculatePriceDetails } =
-		useCart();
-	const [localQuantities, setLocalQuantities] = useState(quantities);
+	const { cart, removeFromCart,  subtotal, calculatePriceDetails } =
+		useCart(); 
 	const [deliveryFee, setDeliveryFee] = useState(0);
 	const [total, setTotal] = useState((subtotal + deliveryFee).toFixed(2));
 	const [zones, setZones] = useState([]);
@@ -58,7 +57,7 @@ const CheckoutScreen = () => {
 		const fetchZones = async () => {
 			try {
 				const res = await axios.get(
-					"https://frischly-server.onrender.com/api/zones?isActive=true"
+					"https://frischlyshop-server.onrender.com/api/zones?isActive=true"
 				);
 				if (res.data.success) {
 					setZones(res.data.data); // store array of zones
@@ -77,12 +76,12 @@ const CheckoutScreen = () => {
 				const userData = await AsyncStorage.getItem("userData");
 				const guest = await AsyncStorage.getItem("guest");
 
-				if (!userData && !guest) {
+				if (!userData) {
 					router.replace("/start");
 					return;
 				}
 
-				if (userData) { 
+				if (userData) {
 					const parsedUser = JSON.parse(userData);
 					const token = parsedUser?.token;
 
@@ -93,7 +92,7 @@ const CheckoutScreen = () => {
 					}
 
 					const res = await fetch(
-						"https://frischly-server.onrender.com/api/auth/me",
+						"https://frischlyshop-server.onrender.com/api/auth/me",
 						{
 							headers: {
 								Authorization: `Bearer ${token}`,
@@ -150,7 +149,7 @@ const CheckoutScreen = () => {
 					flag: `https://flagcdn.com/24x18/${res.data.country_code.toLowerCase()}.png`,
 					dial: `+${res.data.calling_code}`,
 				});
-			} catch (e) {}
+			} catch (e) { }
 		};
 		fetchCountry();
 	}, []);
@@ -184,7 +183,7 @@ const CheckoutScreen = () => {
 			}
 			try {
 				const response = await fetch(
-					"https://frischly-server.onrender.com/api/zones/calculate-delivery",
+					"https://frischlyshop-server.onrender.com/api/zones/calculate-delivery",
 					{
 						method: "POST",
 						headers: { "Content-Type": "application/json" },
@@ -227,7 +226,7 @@ const CheckoutScreen = () => {
 		);
 	}
 
- 
+
 	if (!cart || cart.length === 0) {
 		return (
 			<View style={styles.emptyContainer}>
@@ -348,31 +347,28 @@ const CheckoutScreen = () => {
 			<Text style={styles.heading}>Order Summary</Text>
 
 			<View>
-				{cart.map((item) => {
-					const quantity = localQuantities[item._id] || 1;
-					const priceDetails = calculatePriceDetails(item, quantity);
-					return (
-						<View key={item._id} style={styles.cartItem}>
-							<Image
-								source={{
-									uri: item.picture.replace("/upload/", "/upload/"),
-								}}
-								style={styles.cartImage}
-								resizeMode="contain"
-							/>
-							<View style={{ flex: 1 }}>
-								<Text>{item.title}</Text>
-								<Text>Qty: {quantity}</Text>
-								<Text style={styles.price}>
-									€{priceDetails.finalPrice.toFixed(2)}
-								</Text>
-							</View>
-							<TouchableOpacity onPress={() => handleRemoveFromCart(item._id)}>
-								<Ionicons name="trash" size={20} color="red" />
-							</TouchableOpacity>
-						</View>
-					);
-				})}
+{cart.map((item, index) => {
+  const quantity = item.quantity || 1;
+  const priceDetails = calculatePriceDetails(item, quantity);
+
+  return (
+    <View key={`${item._id}-${index}`} style={styles.cartItem}>
+      <Image
+        source={{ uri: item.picture.replace("/upload/", "/upload/") }}
+        style={styles.cartImage}
+        resizeMode="contain"
+      />
+      <View style={{ flex: 1 }}>
+        <Text>{item.title}</Text>
+        <Text>Qty: {quantity}</Text>
+        <Text style={styles.price}>€{priceDetails.finalPrice.toFixed(2)}</Text>
+      </View>
+      <TouchableOpacity onPress={() => handleRemoveFromCart(item._id)}>
+        <Ionicons name="trash" size={20} color="red" />
+      </TouchableOpacity>
+    </View>
+  );
+})} 
 			</View>
 
 			<View style={styles.summaryRow}>
@@ -431,6 +427,7 @@ const styles = StyleSheet.create({
 	},
 	buttonText: { color: "#FFFFFF", fontWeight: "bold" },
 	emptyContainer: {
+		backgroundColor: "#fff",
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",

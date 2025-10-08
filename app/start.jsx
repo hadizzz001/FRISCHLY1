@@ -51,7 +51,7 @@ export default function Start() {
 		try {
 			// ✅ call login-profile instead of login
 			const res = await axios.post(
-				"https://frischly-server.onrender.com/api/auth/login-profile",
+				"https://frischlyshop-server.onrender.com/api/auth/login-profile",
 				{
 					email,
 					password,
@@ -219,9 +219,11 @@ const placeholderColor = "#666666";
 							router.replace("/(tabs)");
 						}}
 					>
-						<Text style={{ color: "#000", fontSize: 16 }}>
-							Continue as guest
-						</Text>
+<Text style={{ fontSize: 16 }}>
+  <Text style={{ color: "#000" }}>Continue </Text>
+  <Text style={{ color: "#ffc300" }}>as guest</Text>
+</Text>
+
 					</TouchableOpacity>
 				</View>
 			</ScrollView>

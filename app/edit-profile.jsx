@@ -40,7 +40,7 @@ export default function EditProfile() {
             return;
           }
 
-          const res = await fetch("https://frischly-server.onrender.com/api/auth/me", {
+          const res = await fetch("https://frischlyshop-server.onrender.com/api/auth/me", {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export default function EditProfile() {
 
     const fetchZones = async () => {
       try {
-        const res = await fetch("https://frischly-server.onrender.com/api/zones");
+        const res = await fetch("https://frischlyshop-server.onrender.com/api/zones");
         const data = await res.json();
         if (res.ok) setZones(data.data || []);
       } catch (err) {
@@ -105,7 +105,7 @@ export default function EditProfile() {
         },
       };
 
-      const res = await fetch("https://frischly-server.onrender.com/api/auth/profile", {
+      const res = await fetch("https://frischlyshop-server.onrender.com/api/auth/profile", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

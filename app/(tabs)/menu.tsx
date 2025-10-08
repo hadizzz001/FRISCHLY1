@@ -1,84 +1,116 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-	ScrollView,
+	ActivityIndicator,
+	Dimensions,
+	FlatList,
+	Image,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from "react-native";
 
-export default function MenuScreen() {
-	const [categories, setCategories] = useState<any[]>([]);
-	const router = useRouter();
+const { width } = Dimensions.get("window");
+const NUM_COLUMNS = 2; // ✅ Set your number of columns here
+const ITEM_WIDTH = width / NUM_COLUMNS - 20;
+const ITEM_HEIGHT = 130;
 
-	// Fetch categories
+export default function CategoriesGrid() {
+	const router = useRouter();
+	const [categories, setCategories] = useState([]);
+	const [loading, setLoading] = useState(true);
+
 	useEffect(() => {
 		const fetchCategories = async () => {
 			try {
 				const res = await fetch(
-					"https://frischly-server.onrender.com/api/categories"
+					"https://frischlyshop-server.onrender.com/api/categories?limit=1000"
 				);
-				const data = await res.json();
-				setCategories(data.data);
+				const json = await res.json();
+				setCategories(json.data || []);
 			} catch (err) {
 				console.error(err);
+			} finally {
+				setLoading(false);
 			}
 		};
 		fetchCategories();
 	}, []);
 
-	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>Categories</Text>
-			<ScrollView contentContainerStyle={styles.content}>
-				{categories.slice(0, 8).map((cat) => (
-					<TouchableOpacity
-						key={cat._id}
-						onPress={() => {
-							router.push(`/shop?category=${cat.name}`);
-						}}
-						style={styles.item}
-					>
-						<Text style={styles.itemText}>{cat.name}</Text>
-					</TouchableOpacity>
-				))}
+	if (loading) {
+		return (
+			<View
+				style={{
+					height: ITEM_HEIGHT,
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<ActivityIndicator size="large" color="#ffc300" />
+				<Text>Loading categories...</Text>
+			</View>
+		);
+	}
+ 
+	const renderCategory = ({ item: category }) => (
+		<TouchableOpacity
+			key={category._id}
+			onPress={() => router.push(`/shop1?category=${category.name}`)}
+			activeOpacity={0.8}
+			style={styles.card}
+		>
+			<View style={styles.imageWrapper}>
+				<Image
+					source={{ uri: category.image }}
+					style={styles.image}
+					resizeMode="contain"
+				/>
+			</View>
+			<Text style={styles.name} numberOfLines={2}>
+				{category.name}
+			</Text>
+		</TouchableOpacity>
+	);
 
-				<TouchableOpacity
-					onPress={() => {
-						router.push("/shop");
-					}}
-					style={styles.item}
-				>
-					<Text style={styles.itemText}>All Categories</Text>
-				</TouchableOpacity>
-			</ScrollView>
+	return (
+		<View style={{ backgroundColor: "#fff", paddingBottom: 20 }}>
+			<FlatList
+				key={`grid-${NUM_COLUMNS}`} // ✅ Force re-render when numColumns changes
+				data={categories}
+				renderItem={renderCategory}
+				keyExtractor={(item) => item._id}
+				numColumns={NUM_COLUMNS} // ✅ 2 columns
+				contentContainerStyle={styles.gridContainer}
+			/>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#FFFFFF",
-		paddingTop: 60,
+	gridContainer: {
+		paddingHorizontal: 8,
 	},
-	title: {
-		fontSize: 22,
-		fontWeight: "bold",
-		color: "#000000",
-		textAlign: "center",
-		marginBottom: 20,
-	},
-	content: {
-		paddingHorizontal: 20,
+	card: {
+		width: ITEM_WIDTH,
+		margin: 8,
+		backgroundColor: "transparent",
 		alignItems: "center",
 	},
-	item: {
-		marginVertical: 10,
+	imageWrapper: {
+		width: "100%",
+		height: 100,
+		backgroundColor: "#f9f9f9",
+		justifyContent: "center",
+		alignItems: "center",
+		borderRadius: 8,
+		marginBottom: 6,
 	},
-	itemText: {
-		fontSize: 18,
-		color: "#000000",
+	image: { width: "100%", height: "100%", borderRadius: 8 },
+	name: {
+		fontSize: 14,
+		fontWeight: "500",
+		color: "#333",
+		textAlign: "center",
 	},
 });

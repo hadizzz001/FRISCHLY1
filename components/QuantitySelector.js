@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {
-	StyleSheet,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const QuantitySelector = ({ initialQty = 1, productId, onChange }) => {
@@ -17,7 +17,7 @@ const QuantitySelector = ({ initialQty = 1, productId, onChange }) => {
 		const fetchStock1 = async () => {
 			try {
 				const response = await fetch(
-					`https://frischly-server.onrender.com/api/products/${productId}`
+					`https://frischlyshop-server.onrender.com/api/products/${productId}`
 				);
 				const result = await response.json();
 

@@ -2,7 +2,6 @@ import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
 import {
 	Image,
 	ScrollView,
@@ -21,14 +20,11 @@ const Cart = () => {
 		addToCart,
 		calculatePriceDetails,
 	} = useCart();
-
-	const [localQuantities, setLocalQuantities] = useState(quantities);
+ 
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
 	const navigation = useNavigation();
 
-	useEffect(() => {
-		setLocalQuantities(quantities);
-	}, [quantities]);
+ 
 
 	const handleRemoveFromCart = (itemId) => {
 		removeFromCart(itemId);
@@ -42,12 +38,12 @@ const Cart = () => {
 
 			<ScrollView style={styles.cartList}>
 				{cart && cart.length > 0 ? (
-					cart.map((obj) => {
-						const quantity = localQuantities[obj._id] || 1;
+					cart.map((obj, index) => {
+						const quantity = obj.quantity || 1;
 						const priceDetails = calculatePriceDetails(obj, quantity);
 
 						return (
-							<View key={obj._id} style={styles.cartItem}>
+							<View key={`${obj._id}-${index}`} style={styles.cartItem}>
 								<Image source={{ uri: obj.picture }} style={styles.itemImage} />
 
 								<View style={styles.details}>

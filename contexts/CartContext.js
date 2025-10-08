@@ -20,21 +20,19 @@ const cartReducer = (state, action) => {
 
 const CartProvider = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, []);
-  const [quantities, setQuantities] = useState({}); 
   const [subtotal, setSubtotal] = useState(0);
 
-  // Load data from AsyncStorage on mount
+  // Load cart from AsyncStorage on mount
   useEffect(() => {
     const loadData = async () => {
       try {
         const storedCart = await AsyncStorage.getItem("cart");
-        const storedQuantities = await AsyncStorage.getItem("quantities"); 
-
-        if (storedCart)
-          dispatch({ type: "ADD_TO_CART", payload: JSON.parse(storedCart || "[]") });
-        if (storedQuantities)
-          setQuantities(JSON.parse(storedQuantities || "{}"));
-
+        if (storedCart) {
+          dispatch({
+            type: "ADD_TO_CART",
+            payload: JSON.parse(storedCart || "[]"),
+          });
+        }
       } catch (error) {
         console.error("Error loading cart data:", error);
       }
@@ -43,57 +41,51 @@ const CartProvider = ({ children }) => {
     loadData();
   }, []);
 
-  // Save cart
+  // Save cart whenever it changes
   useEffect(() => {
     AsyncStorage.setItem("cart", JSON.stringify(cart)).catch(console.error);
   }, [cart]);
 
-  // Save quantities
-  useEffect(() => { 
-    AsyncStorage.setItem("quantities", JSON.stringify(quantities)).catch(console.error);
-  }, [quantities]);
+  // Helper: Calculate price breakdown for one item
+  const calculatePriceDetails = (item, quantity = 1) => {
+    const basePrice = parseFloat(item.price) || 0;
+    const discountPercent = parseFloat(item.discount) || 0;
+    const taxPercent = parseFloat(item.tax) || 0;
+    const bottleRefund = parseFloat(item.bottlerefund) || 0;
 
-  // Helper: Calculate price breakdown for one item 
-const calculatePriceDetails = (item, quantity = 1) => {
-  const basePrice = parseFloat(item.price) || 0;
-  const discountPercent = parseFloat(item.discount) || 0;
-  const taxPercent = parseFloat(item.tax) || 0;
-  const bottleRefund = parseFloat(item.bottlerefund) || 0;
+    // Step 1: discount
+    const discountAmount = (basePrice * discountPercent) / 100;
+    const afterDiscount = basePrice - discountAmount;
 
-  // Step 1: discount
-  const discountAmount = (basePrice * discountPercent) / 100;
-  const afterDiscount = basePrice - discountAmount;
+    // Step 2: tax
+    const taxAmount = (afterDiscount * taxPercent) / 100;
 
-  // Step 2: tax
-  const taxAmount = (afterDiscount * taxPercent) / 100;
+    // Step 3: final price
+    const finalPrice = (afterDiscount + taxAmount + bottleRefund) * quantity;
 
-  // Step 3: final price 
-  const finalPrice = (afterDiscount + taxAmount + bottleRefund) * quantity;
- 
-  return {
-    basePrice,
-    discountPercent,
-    discountAmount,
-    afterDiscount,
-    taxPercent,
-    taxAmount,
-    bottleRefund,
-    quantity,
-    finalPrice,
+    return {
+      basePrice,
+      discountPercent,
+      discountAmount,
+      afterDiscount,
+      taxPercent,
+      taxAmount,
+      bottleRefund,
+      quantity,
+      finalPrice,
+    };
   };
-};
 
-
-  // Calculate subtotal whenever cart or quantities change
+  // Calculate subtotal whenever cart changes
   useEffect(() => {
     const newSubtotal = cart.reduce((acc, item) => {
-      const quantity = quantities[item._id] || 1;
+      const quantity = item.quantity || 1;
       const { finalPrice } = calculatePriceDetails(item, quantity);
       return acc + finalPrice;
     }, 0);
 
     setSubtotal(newSubtotal);
-  }, [quantities, cart]);
+  }, [cart]);
 
   // Add to cart
   const addToCart = (item, quantity = 1) => {
@@ -102,11 +94,7 @@ const calculatePriceDetails = (item, quantity = 1) => {
     );
 
     if (existingCartItemIndex !== -1) {
-      setQuantities((prev) => ({
-        ...prev,
-        [item._id]: quantity,
-      }));
-
+      // Update quantity
       dispatch({
         type: "UPDATE_CART",
         payload: cart.map((cartItem) =>
@@ -116,40 +104,28 @@ const calculatePriceDetails = (item, quantity = 1) => {
         ),
       });
     } else {
+      // Add new item with quantity
       dispatch({
         type: "ADD_TO_CART",
-        payload: [
-          ...cart,
-          { ...item, quantity },
-        ],
+        payload: [...cart, { ...item, quantity }],
       });
-
-      setQuantities((prev) => ({ ...prev, [item._id]: quantity }));
     }
   };
 
   // Remove from cart
   const removeFromCart = (itemId) => {
     dispatch({ type: "REMOVE_FROM_CART", payload: itemId });
-
-    setQuantities((prev) => {
-      const { [itemId]: removedItem, ...newQuantities } = prev;
-      return newQuantities;
-    });
   };
 
- 
   // Clear cart
-const clearCart = async () => {
-  try {
-    dispatch({ type: "CLEAR_CART" });
-    setQuantities({});
-    await AsyncStorage.removeItem("cart");
-    await AsyncStorage.removeItem("quantities");
-  } catch (error) {
-    console.error("Error clearing cart:", error);
-  }
-};
+  const clearCart = async () => {
+    try {
+      dispatch({ type: "CLEAR_CART" });
+      await AsyncStorage.removeItem("cart");
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+    }
+  };
 
   return (
     <CartContext.Provider
@@ -158,7 +134,6 @@ const clearCart = async () => {
         addToCart,
         removeFromCart,
         clearCart,
-        quantities,
         subtotal,
         calculatePriceDetails, // expose helper for UI
       }}

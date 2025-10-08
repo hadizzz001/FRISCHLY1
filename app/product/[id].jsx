@@ -6,15 +6,12 @@ import { useCart } from "@/contexts/CartContext";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { Image, Modal, StyleSheet, Text, View } from "react-native";
+
 import {
 	Dimensions,
-	Image,
-	Modal,
 	ScrollView,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
+	TouchableOpacity
 } from "react-native";
 import Swiper from "react-native-swiper";
 import Feather from "react-native-vector-icons/Feather";
@@ -36,6 +33,7 @@ const ProductPage = () => {
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [categories, setCategories] = useState([]);
 	const [user, setUser] = useState(null);
+	  const [showModal, setShowModal] = useState(false);
 
 	const token = process.env.EXPO_PUBLIC_JWT_TOKEN;
 
@@ -44,7 +42,7 @@ const ProductPage = () => {
 		const fetchData = async () => {
 			try {
 				const res = await fetch(
-					`https://frischly-server.onrender.com/api/products/${search}`
+					`https://frischlyshop-server.onrender.com/api/products/${search}`
 				);
 				const json = await res.json();
 				if (json?.success && json?.data) setProduct(json.data);
@@ -57,7 +55,7 @@ const ProductPage = () => {
 
 	// Fetch categories
 	useEffect(() => {
-		fetch("https://frischly-server.onrender.com/api/categories")
+		fetch("https://frischlyshop-server.onrender.com/api/categories")
 			.then((res) => res.json())
 			.then((json) => setCategories(json.data || []))
 			.catch((err) => console.error(err));
@@ -68,7 +66,7 @@ const ProductPage = () => {
 		const checkLogin = async () => {
 			try {
 				const res = await fetch(
-					"https://frischly-server.onrender.com/api/auth/me",
+					"https://frischlyshop-server.onrender.com/api/auth/me",
 					{
 						headers: {
 							Authorization: `Bearer ${token}`,
@@ -87,10 +85,22 @@ const ProductPage = () => {
 		checkLogin();
 	}, []);
 
-	const handleSubmit = () => {
-		addToCart(product, quantity);
-		// setBooleanValue(!isBooleanValue);
-	};
+ 
+
+  const handleAddToCart = () => {
+    if (product.is18Plus) {
+      setShowModal(true);
+    } else {
+      addToCart(product, quantity);
+    }
+  };
+
+  const handleModalResponse = (response) => {
+    setShowModal(false);
+    if (response === "yes") {
+      addToCart(product, quantity);
+    }
+  };
 
 	const toggleCart = () => setBooleanValue(!isBooleanValue);
 
@@ -240,7 +250,7 @@ const ProductPage = () => {
 								productId={_id}
 							/>
 							{!isOutOfStock ? (
-								<TouchableOpacity onPress={handleSubmit} style={styles.button}>
+								<TouchableOpacity onPress={handleAddToCart} style={styles.button}>
 									<Text style={styles.buttonText}>ADD TO BAG</Text>
 								</TouchableOpacity>
 							) : (
@@ -384,6 +394,51 @@ const ProductPage = () => {
 					<Cart />
 				</View>
 			)}
+
+
+  
+<Modal visible={showModal} transparent animationType="slide">
+  <View style={styles.modalBackground}>
+    <View style={styles.modalContainer}>
+      <Text style={{ marginBottom: 20 }}>
+        Are your age 18+?
+      </Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <TouchableOpacity
+          onPress={() => handleModalResponse("yes")}
+          style={{
+            backgroundColor: "#ffc300",
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 5,
+            marginRight: 10,
+          }}
+        >
+          <Text style={{ color: "black", textAlign: "center", fontWeight: "bold" }}>
+            Yes
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleModalResponse("no")}
+          style={{
+            backgroundColor: "#ffc300",
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 5,
+          }}
+        >
+          <Text style={{ color: "black", textAlign: "center", fontWeight: "bold" }}>
+            No
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
+
+
+
 		</View>
 	);
 };
@@ -503,6 +558,18 @@ const styles = StyleSheet.create({
 		width: width * 1.2,
 		height: width * 1.2,
 	},
+	  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
 });
 
 export default ProductPage;

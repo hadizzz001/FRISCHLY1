@@ -4,14 +4,14 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-	ActivityIndicator,
-	Dimensions,
-	FlatList,
-	Image,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
+    ActivityIndicator,
+    Dimensions,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { useBooleanValue } from "@/contexts/CartBoolContext";
@@ -45,7 +45,7 @@ export default function ShopPage() {
 			pageNum === 1 ? setLoading(true) : setLoadingMore(true);
 
 			const res = await fetch(
-				`https://frischly-server.onrender.com/api/products?page=${pageNum}&limit=${LIMIT}`
+				`https://frischlyshop-server.onrender.com/api/products?page=${pageNum}&limit=${LIMIT}`
 			);
 			const json = await res.json();
 			const newProducts = json.data || [];
@@ -77,7 +77,7 @@ export default function ShopPage() {
 			} else {
 				try {
 					const res = await fetch(
-						"https://frischly-server.onrender.com/api/auth/me",
+						"https://frischlyshop-server.onrender.com/api/auth/me",
 						{
 							headers: {
 								Authorization: `Bearer ${token}`,

@@ -90,7 +90,7 @@ export default function Register() {
 		const fetchZones = async () => {
 			try {
 				const res = await axios.get(
-					"https://frischly-server.onrender.com/api/zones?isActive=true"
+					"https://frischlyshop-server.onrender.com/api/zones?isActive=true"
 				);
 				if (res.data.success) {
 					setZones(res.data.data); // store the array of zones
@@ -135,14 +135,14 @@ export default function Register() {
 		const userData = {
 			name,
 			phoneNumber: sanitizedPhone,
-			email,
+			 email: email.toLowerCase(),
 			password,
 			address: { street, city, state: stateVal, zipCode, country },
 		};
 
 		try {
 			const res = await axios.post(
-				"https://frischly-server.onrender.com/api/auth/register",
+				"https://frischlyshop-server.onrender.com/api/auth/register",
 				userData,
 				{ headers: { "Content-Type": "application/json" } }
 			);
@@ -155,10 +155,13 @@ export default function Register() {
 			}
 		} catch (error) {
 			console.log("Registration error:", error.errors?.data || error.message);
-			Alert.alert(
-				"Error",
-				error.response?.data?.message || "Registration failed"
-			);
+Alert.alert(
+	"Error",
+	error.response?.data?.message?.includes("Validation failed")
+		? "Error: Check email if correct or password is strong (password should contain uppercase, lowercase, numbers, and special letters)"
+		: error.response?.data?.message || "Registration failed"
+);
+
 		}
 	};
 
