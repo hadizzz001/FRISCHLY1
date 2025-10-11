@@ -47,6 +47,9 @@ const CheckoutPage = ({ items, customer }) => {
             const data = await res.json();
             const card = data?.data?.user?.creditCard;
 
+            console.log("Saved: ", card);
+            
+
             if (card && card.cardNumber) {
               setHolderName(card.holderName || "");
               setCardNumber(card.cardNumber || "");
@@ -119,7 +122,7 @@ const CheckoutPage = ({ items, customer }) => {
         expiryMonth: expiryMonth.trim(),
         expiryYear: expiryYear.trim(),
         cardType: cardType.trim().toLowerCase(),
-        cvv: cvv.trim(),
+        // cvv: cvv.trim(),
       };
 
       const cardRes = await fetch("https://frischlyshop-server.onrender.com/api/auth/profile", {
@@ -163,71 +166,70 @@ const CheckoutPage = ({ items, customer }) => {
   };
 
   // -------------------- Render --------------------
-  return (
-    <ScrollView style={styles.container}>
-      {hasCard && !showForm ? (
-        <View style={{ marginBottom: 20 }}>
-          <Text style={styles.title}>Saved Card</Text>
-          <Text style={{ marginBottom: 10 }}>**** **** **** {cardNumber.slice(-4)}</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setHolderName(""); setCardNumber(""); setExpiryMonth(""); setExpiryYear("");
-              setCvv(""); setCardType(""); setShowForm(true);
-            }}
-          >
-            <Text style={styles.buttonText}>Replace Card</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={{ marginBottom: 20 }}>
-          <Text style={styles.title}>Payment Information</Text>
+return (
+  <ScrollView style={styles.container}>
+    
+ 
 
-          <Text>Card Holder Name</Text>
-          <TextInput style={styles.input} value={holderName} onChangeText={setHolderName} maxLength={100} />
+    <Text style={styles.title}>Payment Information</Text>
 
-          <Text>Card Number</Text>
-          <TextInput style={styles.input} keyboardType="numeric" value={cardNumber} onChangeText={(text) => setCardNumber(text.replace(/\D/g, ""))} maxLength={19} />
+    <Text>Card Holder Name</Text>
+    <TextInput style={styles.input} value={holderName} onChangeText={setHolderName} maxLength={100} />
 
-          <Text>Expiry Month</Text>
-          <View style={styles.pickerContainer}>
-            <Picker selectedValue={expiryMonth} onValueChange={setExpiryMonth}>
-              <Picker.Item label="Select Month" value="" />
-              {months.map(m => <Picker.Item key={m} label={m} value={m} />)}
-            </Picker>
-          </View>
+    <Text>Card Number</Text>
+    <TextInput
+      style={styles.input}
+      keyboardType="numeric"
+      value={cardNumber}
+      onChangeText={(text) => setCardNumber(text.replace(/\D/g, ""))}
+      maxLength={19}
+    />
 
-          <Text>Expiry Year</Text>
-          <View style={styles.pickerContainer}>
-            <Picker selectedValue={expiryYear} onValueChange={setExpiryYear}>
-              <Picker.Item label="Select Year" value="" />
-              {years.map(y => <Picker.Item key={y} label={y} value={y} />)}
-            </Picker>
-          </View>
+    <Text>Expiry Month</Text>
+    <View style={styles.pickerContainer}>
+      <Picker selectedValue={expiryMonth} onValueChange={setExpiryMonth}>
+        <Picker.Item label="Select Month" value="" />
+        {months.map(m => <Picker.Item key={m} label={m} value={m} />)}
+      </Picker>
+    </View>
 
-          <Text>CVV</Text>
-          <TextInput style={styles.input} keyboardType="numeric" secureTextEntry value={cvv} onChangeText={(text) => setCvv(text.replace(/\D/g, ""))} maxLength={4} />
+    <Text>Expiry Year</Text>
+    <View style={styles.pickerContainer}>
+      <Picker selectedValue={expiryYear} onValueChange={setExpiryYear}>
+        <Picker.Item label="Select Year" value="" />
+        {years.map(y => <Picker.Item key={y} label={y} value={y} />)}
+      </Picker>
+    </View>
 
-          <Text>Card Type</Text>
-          <View style={styles.pickerContainer}>
-            <Picker selectedValue={cardType} onValueChange={setCardType}>
-              <Picker.Item label="Select Card Type" value="" />
-              {allowedCardTypes.map(type => (
-                <Picker.Item key={type} label={type.charAt(0).toUpperCase() + type.slice(1)} value={type} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-      )}
+    <Text>CVV</Text>
+    <TextInput
+      style={styles.input}
+      keyboardType="numeric"
+      secureTextEntry
+      value={cvv}
+      onChangeText={(text) => setCvv(text.replace(/\D/g, ""))}
+      maxLength={4}
+    />
 
-      {/* Pay Now Button */}
-      <View style={{ marginBottom: 40 }}>
-        <TouchableOpacity style={styles.button} onPress={handlePayNow} disabled={loading}>
-          {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.buttonText}>Pay Now</Text>}
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
+    <Text>Card Type</Text>
+    <View style={styles.pickerContainer}>
+      <Picker selectedValue={cardType} onValueChange={setCardType}>
+        <Picker.Item label="Select Card Type" value="" />
+        {allowedCardTypes.map(type => (
+          <Picker.Item key={type} label={type.charAt(0).toUpperCase() + type.slice(1)} value={type} />
+        ))}
+      </Picker>
+    </View>
+
+    {/* Pay Now Button */}
+    <View style={{ marginBottom: 40 }}>
+      <TouchableOpacity style={styles.button} onPress={handlePayNow} disabled={loading}>
+        {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.buttonText}>Pay Now</Text>}
+      </TouchableOpacity>
+    </View>
+  </ScrollView>
+);
+
 };
 
 // -------------------- Styles --------------------

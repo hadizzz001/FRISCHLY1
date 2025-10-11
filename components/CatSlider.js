@@ -56,7 +56,7 @@ export default function CategoriesGrid() {
 	const renderCategory = ({ item: category }) => (
 		<TouchableOpacity
 			key={category._id}
-			onPress={() => router.push(`/shop?category=${category.name}`)}
+			onPress={() => router.push(`/shop1?category=${category.name}`)}
 			activeOpacity={0.8}
 			style={styles.card}
 		>

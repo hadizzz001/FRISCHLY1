@@ -4,11 +4,6 @@ import Header from "@/components/Header";
 import { BooleanProvider } from "@/contexts/CartBoolContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import {
-	DarkTheme,
-	DefaultTheme,
-	ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack, usePathname } from "expo-router"; // <-- usePathname
 import { StatusBar } from "expo-status-bar";
@@ -51,9 +46,7 @@ export default function RootLayout() {
 	return (
 		<CartProvider>
 			<BooleanProvider>
-				<ThemeProvider
-					value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-				>
+ 
 					<View style={styles.container}>
 						{showHeader && <Header />} {/* Show header conditionally */}
 						{/* Main navigation stack */}
@@ -81,9 +74,9 @@ export default function RootLayout() {
 							<Stack.Screen name="+not-found" />
 						</Stack>
 						<StatusBar style="auto" />
-					</View>
-				</ThemeProvider>
+					</View> 
 			</BooleanProvider>
+			
 		</CartProvider>
 	);
 }
