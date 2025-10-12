@@ -30,9 +30,7 @@ export default function DiscountCarousel({ refreshTrigger }) {
 				"https://frischlyshop-server.onrender.com/api/products/discount"
 			);
 			const json = await res.json();
-			const withDiscount = json.data.filter(
-				(item) => item.discount && item.discount > 0
-			);
+			const withDiscount = json.data;
 			setDiscountedProducts(withDiscount.slice(0, 12));
 		} catch (err) {
 			console.error(err);

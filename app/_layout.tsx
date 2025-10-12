@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { BooleanProvider } from "@/contexts/CartBoolContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useFonts } from "expo-font";
 import { Stack, usePathname } from "expo-router"; // <-- usePathname
 import { StatusBar } from "expo-status-bar";
@@ -17,6 +18,9 @@ export default function RootLayout() {
 	const [loaded] = useFonts({
 		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
 	});
+
+	// Initialize notifications
+	useNotifications();
 
 	// For Lower.js overlays
 	const [menuOpen, setMenuOpen] = useState(false);
