@@ -22,7 +22,7 @@ const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 2 - 20;
 const LIMIT = 10; // items per fetch
 
-export default function ShopPage() {
+export default function ShopPage({ refreshTrigger }) {
 	const colorScheme = useColorScheme();
 	const router = useRouter();
 	const [products, setProducts] = useState([]);
@@ -65,6 +65,14 @@ export default function ShopPage() {
 	useEffect(() => {
 		fetchProducts(1);
 	}, []);
+
+	useEffect(() => {
+		if (refreshTrigger > 0) {
+			setPage(1);
+			setHasMore(true);
+			fetchProducts(1);
+		}
+	}, [refreshTrigger]);
 
 	// Check login & fetch user
 	useEffect(() => {
