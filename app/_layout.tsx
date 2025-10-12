@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import { BooleanProvider } from "@/contexts/CartBoolContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useNotifications } from "@/hooks/useNotifications";
 import { useFonts } from "expo-font";
 import { Stack, usePathname } from "expo-router"; // <-- usePathname
 import { StatusBar } from "expo-status-bar";
@@ -18,9 +17,6 @@ export default function RootLayout() {
 	const [loaded] = useFonts({
 		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
 	});
-
-	// Initialize notifications
-	useNotifications();
 
 	// For Lower.js overlays
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -50,37 +46,38 @@ export default function RootLayout() {
 	return (
 		<CartProvider>
 			<BooleanProvider>
- 
-					<View style={styles.container}>
-						{showHeader && <Header />} {/* Show header conditionally */}
-						{/* Main navigation stack */}
-						<Stack
-							screenOptions={{
-								headerTitle: "",
-							}}
-						>
-							<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+				<View style={styles.container}>
+					{showHeader && <Header />} {/* Show header conditionally */}
+					{/* Main navigation stack */}
+					<Stack
+						screenOptions={{
+							headerTitle: "",
+						}}
+					>
+						<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-							{/* Force hide header for auth screens */}
-							<Stack.Screen name="start" options={{ headerShown: false }} />
-							<Stack.Screen name="register" options={{ headerShown: false }} />
-							<Stack.Screen name="shop" options={{ headerShown: false }} />
-							<Stack.Screen name="shop1" options={{ headerShown: false }} />
-							<Stack.Screen name="checkout" options={{ headerShown: false }} />
-							<Stack.Screen name="order" options={{ headerShown: false }} />
-							<Stack.Screen name="edit-profile" options={{ headerShown: false }} />
-							<Stack.Screen name="done" options={{ headerShown: false }} />
-							<Stack.Screen
-								name="product/[id]"
-								options={{ headerShown: false }}
-							/>
+						{/* Force hide header for auth screens */}
+						<Stack.Screen name="start" options={{ headerShown: false }} />
+						<Stack.Screen name="register" options={{ headerShown: false }} />
+						<Stack.Screen name="shop" options={{ headerShown: false }} />
+						<Stack.Screen name="shop1" options={{ headerShown: false }} />
+						<Stack.Screen name="checkout" options={{ headerShown: false }} />
+						<Stack.Screen name="order" options={{ headerShown: false }} />
+						<Stack.Screen
+							name="edit-profile"
+							options={{ headerShown: false }}
+						/>
+						<Stack.Screen name="done" options={{ headerShown: false }} />
+						<Stack.Screen
+							name="product/[id]"
+							options={{ headerShown: false }}
+						/>
 
-							<Stack.Screen name="+not-found" />
-						</Stack>
-						<StatusBar style="auto" />
-					</View> 
+						<Stack.Screen name="+not-found" />
+					</Stack>
+					<StatusBar style="auto" />
+				</View>
 			</BooleanProvider>
-			
 		</CartProvider>
 	);
 }
