@@ -93,59 +93,56 @@ export default function ShopPage() {
 		getSubcategories();
 	}, []);
 
-const fetchProducts = async (nextPage = 1, replace = false) => {
-  try {
-    if (nextPage === 1) setLoading(true);
-    else setIsFetchingMore(true);
+	const fetchProducts = async (nextPage = 1, replace = false) => {
+		try {
+			if (nextPage === 1) setLoading(true);
+			else setIsFetchingMore(true);
 
-    const params = new URLSearchParams();
-    params.append("page", nextPage);
-    params.append("limit", 12);
+			const params = new URLSearchParams();
+			params.append("page", nextPage);
+			params.append("limit", 12);
 
-    // include filters
-    if (filters.search) params.append("search", filters.search);
-    if (filters.subcategory) params.append("subcategory", filters.subcategory);
-    if (filters.sortBy) {
-      params.append("sortBy", filters.sortBy);
-      params.append("sortOrder", filters.sortOrder);
-    }
-    if (filters.priceRange) params.append("priceRange", filters.priceRange);
-    if (filters.stockLevel) params.append("stockLevel", filters.stockLevel);
-    if (filters.discount) {
-      params.append("discount", "true"); 
-      params.append("minDiscount", String(filters.minDiscount));
-    }
+			// include filters
+			if (filters.search) params.append("search", filters.search);
+			if (filters.subcategory)
+				params.append("subcategory", filters.subcategory);
+			if (filters.sortBy) {
+				params.append("sortBy", filters.sortBy);
+				params.append("sortOrder", filters.sortOrder);
+			}
+			if (filters.priceRange) params.append("priceRange", filters.priceRange);
+			if (filters.stockLevel) params.append("stockLevel", filters.stockLevel);
 
-    // include category & discount param from query
-    if (categoryParam) params.append("category", categoryParam);
-    if (discountParam === "true") params.append("discount", "true");
+			// include category & discount param from query
+			if (categoryParam) params.append("category", categoryParam);
+			let url;
+			if (discountParam === "true") {
+				url = `https://frischlyshop-server.onrender.com/api/products/discount?limit=1000`;
+			} else {
+				url = `https://frischlyshop-server.onrender.com/api/products?${params.toString()}`;
+			}
 
-    const url = `https://frischlyshop-server.onrender.com/api/products?${params.toString()}`;
+			console.log("URL:", url);
 
-	console.log("URL:", url);
-	
+			const res = await fetch(url);
+			const json = await res.json();
 
-    const res = await fetch(url);
-    const json = await res.json();
+			const newData = Array.isArray(json.data) ? json.data : [];
 
-    const newData = Array.isArray(json.data) ? json.data : [];
+			setProducts((prev) => (replace ? newData : [...prev, ...newData]));
+			setHasNextPage(json.pagination?.hasNextPage ?? false);
+		} catch (err) {
+			console.error("fetchProducts error:", err);
+		} finally {
+			setLoading(false);
+			setIsFetchingMore(false);
+		}
+	};
 
-    setProducts((prev) => (replace ? newData : [...prev, ...newData]));
-    setHasNextPage(json.pagination?.hasNextPage ?? false);
-  } catch (err) {
-    console.error("fetchProducts error:", err);
-  } finally {
-    setLoading(false);
-    setIsFetchingMore(false);
-  }
-};
-
-
-useEffect(() => {
-  setPage(1);
-  fetchProducts(1, true); // replace = true so it starts fresh
-}, [categoryParam, discountParam]);
-
+	useEffect(() => {
+		setPage(1);
+		fetchProducts(1, true); // replace = true so it starts fresh
+	}, [categoryParam, discountParam]);
 
 	// ✅ Check login & fetch user
 	useEffect(() => {
@@ -182,14 +179,13 @@ useEffect(() => {
 		checkLogin();
 	}, []);
 
-const loadMore = () => {
-  if (!hasNextPage || isFetchingMore) return;
+	const loadMore = () => {
+		if (!hasNextPage || isFetchingMore) return;
 
-  const nextPage = page + 1;
-  setPage(nextPage);
-  fetchProducts(nextPage, false); // append instead of replace
-};
-
+		const nextPage = page + 1;
+		setPage(nextPage);
+		fetchProducts(nextPage, false); // append instead of replace
+	};
 
 	const renderProduct = ({ item }) => {
 		const basePrice = item.price || 0;
@@ -382,26 +378,24 @@ const loadMore = () => {
 							</Picker>
 						</View>
 
- 
-{/* Sort Dropdown */}
-<Text style={{ marginTop: 20, marginBottom: 5 }}>Sort By</Text>
-<View style={styles.input}>
-  <Picker
-    selectedValue={`${filters.sortBy}_${filters.sortOrder}`}
-    onValueChange={(v) => {
-      const [sortBy, sortOrder] = v.split("_");
-      setFilters((p) => ({ ...p, sortBy, sortOrder }));
-    }}
-  >
-    <Picker.Item label="Price: Low to High" value="price_asc" />
-    <Picker.Item label="Price: High to Low" value="price_desc" />
-    <Picker.Item label="Name: A to Z" value="name_asc" />
-    <Picker.Item label="Name: Z to A" value="name_desc" />
-    <Picker.Item label="Newest First" value="createdAt_desc" />
-    <Picker.Item label="Oldest First" value="createdAt_asc" />
-  </Picker>
-</View>
-
+						{/* Sort Dropdown */}
+						<Text style={{ marginTop: 20, marginBottom: 5 }}>Sort By</Text>
+						<View style={styles.input}>
+							<Picker
+								selectedValue={`${filters.sortBy}_${filters.sortOrder}`}
+								onValueChange={(v) => {
+									const [sortBy, sortOrder] = v.split("_");
+									setFilters((p) => ({ ...p, sortBy, sortOrder }));
+								}}
+							>
+								<Picker.Item label="Price: Low to High" value="price_asc" />
+								<Picker.Item label="Price: High to Low" value="price_desc" />
+								<Picker.Item label="Name: A to Z" value="name_asc" />
+								<Picker.Item label="Name: Z to A" value="name_desc" />
+								<Picker.Item label="Newest First" value="createdAt_desc" />
+								<Picker.Item label="Oldest First" value="createdAt_asc" />
+							</Picker>
+						</View>
 
 						{/* Discount Toggle */}
 						<TouchableOpacity
@@ -440,17 +434,16 @@ const loadMore = () => {
 						</View>
 
 						{/* Apply Filters Button */}
-<TouchableOpacity
-  style={styles.button}
-  onPress={() => {
-    setFilterOpen(false);
-    setPage(1);
-    fetchProducts(1, true); // replace products with new filter results
-  }}
->
-  <Text style={styles.buttonText}>Apply Filters</Text>
-</TouchableOpacity>
-
+						<TouchableOpacity
+							style={styles.button}
+							onPress={() => {
+								setFilterOpen(false);
+								setPage(1);
+								fetchProducts(1, true); // replace products with new filter results
+							}}
+						>
+							<Text style={styles.buttonText}>Apply Filters</Text>
+						</TouchableOpacity>
 					</ScrollView>
 				</View>
 			)}

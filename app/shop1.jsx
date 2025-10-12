@@ -40,7 +40,7 @@ export default function ShopPage() {
 		try {
 			setLoading(true);
 			const res = await fetch(
-				`https://frischlyshop-server.onrender.com/api/products?category=${encodeURIComponent(
+				`https://frischlyshop-server.onrender.com/api/products?limit=200&category=${encodeURIComponent(
 					category
 				)}`
 			);
@@ -156,7 +156,10 @@ export default function ShopPage() {
 		<ScrollView style={styles.container}>
 			{/* Back Button */}
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+				<TouchableOpacity
+					onPress={() => router.back()}
+					style={styles.backButton}
+				>
 					<Feather name="chevron-left" size={24} color="#000" />
 				</TouchableOpacity>
 				<Text style={styles.headerTitle}>{category}</Text>
