@@ -12,18 +12,11 @@ import {
 } from "react-native";
 
 const Cart = () => {
-	const {
-		cart,
-		removeFromCart,
-		subtotal,
-		addToCart,
-		calculatePriceDetails,
-	} = useCart();
- 
+	const { cart, removeFromCart, subtotal, addToCart, calculatePriceDetails } =
+		useCart();
+
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
 	const router = useRouter();
-
- 
 
 	const handleRemoveFromCart = (itemId) => {
 		removeFromCart(itemId);

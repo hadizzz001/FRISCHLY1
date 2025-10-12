@@ -16,32 +16,40 @@ const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 3 - 12; // Show exactly 3 per row
 const ITEM_HEIGHT = 155;
 
-export default function DiscountCarousel() {
+export default function DiscountCarousel({ refreshTrigger }) {
 	const router = useRouter();
 	const [discountedProducts, setDiscountedProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const flatListRef = useRef(null);
 	const [currentIndex, setCurrentIndex] = useState(0);
 
+	const fetchDiscountProducts = async () => {
+		try {
+			setLoading(true);
+			const res = await fetch(
+				"https://frischlyshop-server.onrender.com/api/products/discount"
+			);
+			const json = await res.json();
+			const withDiscount = json.data.filter(
+				(item) => item.discount && item.discount > 0
+			);
+			setDiscountedProducts(withDiscount.slice(0, 12));
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	useEffect(() => {
-		const fetchDiscountProducts = async () => {
-			try {
-				const res = await fetch(
-					"https://frischlyshop-server.onrender.com/api/products/discount"
-				);
-				const json = await res.json();
-				const withDiscount = json.data.filter(
-					(item) => item.discount && item.discount > 0
-				);
-				setDiscountedProducts(withDiscount.slice(0, 12));
-			} catch (err) {
-				console.error(err);
-			} finally {
-				setLoading(false);
-			}
-		};
 		fetchDiscountProducts();
 	}, []);
+
+	useEffect(() => {
+		if (refreshTrigger > 0) {
+			fetchDiscountProducts();
+		}
+	}, [refreshTrigger]);
 
 	// ✅ Auto Slider Effect
 	useEffect(() => {

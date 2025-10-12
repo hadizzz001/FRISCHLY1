@@ -16,27 +16,35 @@ const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 4 - 15; // 4 items per row
 const ITEM_HEIGHT = 130;
 
-export default function CategoriesGrid() {
+export default function CategoriesGrid({ refreshTrigger }) {
 	const router = useRouter();
 	const [categories, setCategories] = useState([]);
 	const [loading, setLoading] = useState(true);
 
+	const fetchCategories = async () => {
+		try {
+			setLoading(true);
+			const res = await fetch(
+				"https://frischlyshop-server.onrender.com/api/categories?limit=1000"
+			);
+			const json = await res.json();
+			setCategories(json.data || []);
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	useEffect(() => {
-		const fetchCategories = async () => {
-			try {
-				const res = await fetch(
-					"https://frischlyshop-server.onrender.com/api/categories?limit=1000"
-				);
-				const json = await res.json();
-				setCategories(json.data || []);
-			} catch (err) {
-				console.error(err);
-			} finally {
-				setLoading(false);
-			}
-		};
 		fetchCategories();
 	}, []);
+
+	useEffect(() => {
+		if (refreshTrigger > 0) {
+			fetchCategories();
+		}
+	}, [refreshTrigger]);
 
 	if (loading) {
 		return (

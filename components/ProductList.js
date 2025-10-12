@@ -22,7 +22,7 @@ const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 2 - 20;
 const LIMIT = 10; // items per fetch
 
-export default function ShopPage() {
+export default function ShopPage({ refreshTrigger, setRefreshing }) {
 	const colorScheme = useColorScheme();
 	const router = useRouter();
 	const [products, setProducts] = useState([]);
@@ -43,9 +43,13 @@ export default function ShopPage() {
 	const fetchProducts = async (pageNum = 1) => {
 		try {
 			pageNum === 1 ? setLoading(true) : setLoadingMore(true);
+			if (pageNum === 1) {
+				setPage(1);
+				setHasMore(true);
+			}
 
 			const res = await fetch(
-				`https://frischlyshop-server.onrender.com/api/products?page=${pageNum}&limit=${LIMIT}`
+				`https://frischlyshop-server.onrender.com/api/products?page=${pageNum}&limit=${LIMIT}&isActive=true&inAds=all&stockLevel=Available&sortBy=categorySortOrder&sortOrder=asc`
 			);
 			const json = await res.json();
 			const newProducts = json.data || [];
@@ -65,6 +69,13 @@ export default function ShopPage() {
 	useEffect(() => {
 		fetchProducts(1);
 	}, []);
+
+	useEffect(() => {
+		if (refreshTrigger > 0) {
+			setRefreshing(true);
+			fetchProducts(1).finally(() => setRefreshing(false));
+		}
+	}, [refreshTrigger, setRefreshing]);
 
 	// Check login & fetch user
 	useEffect(() => {
