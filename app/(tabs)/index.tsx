@@ -1,11 +1,7 @@
-// @ts-ignore
-import CatSlider from "@/components/CatSlider.js";
-// @ts-ignore
-import Footer from "@/components/Footer.js";
-// @ts-ignore
-import ProductList from "@/components/ProductList.js";
-// @ts-ignore
-import ProductSlide from "@/components/ProductSlide.js";
+import CatSlider from "@/components/CatSlider";
+import Footer from "@/components/Footer";
+import ProductList from "@/components/ProductList";
+import ProductSlide from "@/components/ProductSlide";
 import { useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 
