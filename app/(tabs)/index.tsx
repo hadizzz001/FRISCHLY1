@@ -11,7 +11,7 @@ export default function HomeScreen() {
 				<ProductSlide />
 				<CatSlider />
 				<ProductList />
-				<Footer/>
+				<Footer />
 			</ScrollView>
 		</>
 	);
