@@ -1,7 +1,7 @@
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import {
 	Image,
 	ScrollView,
@@ -15,14 +15,13 @@ const Cart = () => {
 	const {
 		cart,
 		removeFromCart,
-		quantities,
 		subtotal,
 		addToCart,
 		calculatePriceDetails,
 	} = useCart();
  
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
-	const navigation = useNavigation();
+	const router = useRouter();
 
  
 
@@ -30,7 +29,7 @@ const Cart = () => {
 		removeFromCart(itemId);
 	};
 
-	const goToCart = () => navigation.navigate("checkout");
+	const goToCart = () => router.push("/checkout");
 
 	return (
 		<View style={styles.container}>
