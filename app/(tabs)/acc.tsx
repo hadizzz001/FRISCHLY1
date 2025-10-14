@@ -1,18 +1,51 @@
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+	Alert, Modal, ScrollView,
+	StyleSheet,
+	Text, TextInput, TouchableOpacity,
+	View
 } from "react-native";
 
 export default function AccScreen() {
 	const [user, setUser] = useState<any>(null);
 	const router = useRouter(); 
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+
+  const handleDeleteAccount = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("userData");
+      const parsedUser = userData ? JSON.parse(userData) : null;
+      const token = parsedUser?.token;
+
+      const res = await fetch(
+        "https://frischlyshop-server.onrender.com/api/auth/delete-account",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password: passwordInput }),
+        }
+      );
+
+      if (res.ok) {
+        Alert.alert("Account Deleted", "Your account has been removed.");
+        await AsyncStorage.removeItem("userData");
+        router.replace("/start");
+      } else {
+        const errorData = await res.json();
+        Alert.alert("Error", errorData.message || "Failed to delete account.");
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Something went wrong.");
+    }
+  };
 
 
 	useEffect(() => {
@@ -244,21 +277,65 @@ export default function AccScreen() {
 		</Text>
 	</TouchableOpacity>
 
-	{/* Delete Account */}
-	{user && (
-		<TouchableOpacity
-			style={[styles.actionButton, styles.deleteButton]}
-			onPress={async () => {
-				await AsyncStorage.removeItem("userData");
-				router.replace("/start");
-			}}
-		>
-			<Feather name="trash-2" size={20} color="#fff" style={styles.buttonIcon} />
-			<Text style={[styles.actionButtonText, styles.deleteText]}>
-				Delete Account
-			</Text>
-		</TouchableOpacity>
-	)}
+
+      {user && (
+        <TouchableOpacity
+          style={[styles.actionButton, styles.deleteButton]}
+          onPress={() => setShowDeleteModal(true)}
+        >
+          <Feather name="trash-2" size={20} color="#fff" style={styles.buttonIcon} />
+          <Text style={[styles.actionButtonText, styles.deleteText]}>
+            Delete Account
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {/* ✅ Password Confirmation Modal */}
+      <Modal
+        transparent={true}
+        visible={showDeleteModal}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={{
+          flex: 1, justifyContent: "center", alignItems: "center",
+          backgroundColor: "rgba(0,0,0,0.5)"
+        }}>
+          <View style={{
+            backgroundColor: "#fff", padding: 20, borderRadius: 12,
+            width: "80%", alignItems: "center"
+          }}>
+            <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
+              Confirm Password
+            </Text>
+            <TextInput
+              placeholder="Enter your password"
+              secureTextEntry
+              value={passwordInput}
+              onChangeText={setPasswordInput}
+              style={{
+                borderWidth: 1, borderColor: "#ccc", borderRadius: 8,
+                padding: 10, width: "100%", marginBottom: 15
+              }}
+            />
+            <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
+              <TouchableOpacity
+                style={[styles.actionButton, { flex: 1, backgroundColor: "#ccc", marginRight: 5 }]}
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text style={{ color: "#000", fontWeight: "bold" }}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.actionButton, { flex: 1, backgroundColor: "#FF4444", marginLeft: 5 }]}
+                onPress={handleDeleteAccount}
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 </View>
 
 		</ScrollView>

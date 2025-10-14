@@ -8,11 +8,15 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Modal,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
+
+ 
 
 export default function TestOrder() {
   const [user, setUser] = useState(null);
@@ -22,6 +26,74 @@ export default function TestOrder() {
   const [productImages, setProductImages] = useState({}); // ✅ Cache for product images
 	const router = useRouter();
   const { cart } = useCart();
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+const [cancelReason, setCancelReason] = useState('');
+const [selectedOrderId, setSelectedOrderId] = useState(null);
+
+const promptCancelOrder = (orderId) => {
+  setSelectedOrderId(orderId);
+  setCancelReason('');
+  setCancelModalVisible(true);
+};
+
+const handleCancel = async () => {
+  console.log("🚀 Attempting to cancel order:", selectedOrderId);
+  console.log("📝 Cancel Reason:", cancelReason);
+
+  if (!cancelReason.trim()) {
+    alert("Please provide a reason for cancellation");
+    return;
+  }
+
+  try {
+    const userData = await AsyncStorage.getItem('userData');
+    const parsedUser = userData ? JSON.parse(userData) : null;
+    const token = parsedUser?.token;
+
+    console.log("🔑 Token Found:", token ? "YES" : "NO");
+
+    if (!token) {
+      console.log("❌ No token found in AsyncStorage");
+      alert("Not authenticated");
+      return;
+    }
+
+    const url = `https://frischlyshop-server.onrender.com/api/orders/${selectedOrderId}/cancel`;
+    console.log("🌍 API URL:", url);
+
+    const bodyData = JSON.stringify({ reason: cancelReason });
+    console.log("📦 Request Body:", bodyData);
+
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: bodyData,
+    });
+
+    console.log("📬 Raw Response:", res);
+    const responseText = await res.text();
+    console.log("📨 Response Body:", responseText);
+
+    if (res.ok) {
+      console.log("✅ Order cancelled successfully!");
+      setOrders(prev =>
+        prev.map(o => (o._id === selectedOrderId ? { ...o, status: "cancelled" } : o))
+      );
+      setCancelModalVisible(false);
+      alert("Order cancelled successfully");
+    } else {
+      console.log("❌ Failed to cancel. Status:", res.status);
+      alert("Failed to cancel order");
+    }
+  } catch (e) {
+    console.error("🔥 Exception during cancellation:", e);
+    alert("An error occurred");
+  }
+};
+
 
   useEffect(() => {
     const checkLoginAndFetchOrders = async () => {
@@ -111,13 +183,40 @@ export default function TestOrder() {
     );
   };
 
-  const renderOrderItem = (item) => (
-    <View style={styles.itemsContainer}>
-      {item.items.map((i) => (
-        <ProductRow key={i._id} item={i} />
-      ))}
-    </View>
-  );
+const renderOrderItem = (item) => (
+  <View style={styles.itemsContainer}>
+    {item.items.map((i) => (
+      <ProductRow key={i._id} item={i} />
+    ))} 
+
+    {/* ✅ Cancel Button (only if not delivered or cancelled) */}
+    {item.status !== "delivered" && item.status !== "cancelled" && (
+<TouchableOpacity
+  style={{ 
+    marginTop: 8, 
+    paddingVertical: 4, 
+    paddingHorizontal: 8, 
+    backgroundColor: "red", 
+    borderRadius: 4,
+    alignSelf: 'flex-start'
+  }}
+  onPress={() => promptCancelOrder(item._id)} // <-- show modal
+>
+  <Text style={{ 
+    color: "white", 
+    textAlign: "center", 
+    fontWeight: "bold", 
+    fontSize: 12
+  }}>
+    Cancel Order
+  </Text>
+</TouchableOpacity>
+
+    )}
+  </View>
+);
+
+
 
   if (loading) {
     return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center' }} />;
@@ -179,9 +278,65 @@ const renderItem = ({ item }) => (
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
       />
+
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={cancelModalVisible}
+  onRequestClose={() => setCancelModalVisible(false)}
+>
+  <View style={{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
+    backgroundColor:'rgba(0,0,0,0.5)'
+  }}>
+    <View style={{
+      width:'85%',
+      backgroundColor:'#fff',
+      borderRadius:8,
+      padding:20,
+    }}>
+      <Text style={{fontWeight:'bold', marginBottom:10}}>Reason for cancellation</Text>
+      <TextInput
+        value={cancelReason}
+        onChangeText={setCancelReason}
+        placeholder="Type your reason..."
+        style={{
+          borderWidth:1,
+          borderColor:'#ccc',
+          borderRadius:6,
+          padding:10,
+          marginBottom:15,
+          height:80,
+          textAlignVertical:'top'
+        }}
+        multiline
+      />
+      <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+        <TouchableOpacity
+          onPress={() => setCancelModalVisible(false)}
+          style={{padding:10, backgroundColor:'#ccc', borderRadius:6, flex:1, marginRight:5}}
+        >
+          <Text style={{textAlign:'center', color:'#000'}}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleCancel}
+          style={{padding:10, backgroundColor:'red', borderRadius:6, flex:1, marginLeft:5}}
+        >
+          <Text style={{textAlign:'center', color:'#fff'}}>Submit</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 }
+
+
+
 
 const styles = StyleSheet.create({
   container: {

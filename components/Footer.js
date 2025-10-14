@@ -29,8 +29,8 @@ export default function Footer() {
       isOpen: showPolicies,
       toggle: () => setShowPolicies(!showPolicies),
       items: [
-        { text: "Privacy Policy", action: () => router.push("../privacy") },
-        { text: "Terms of Service", action: () => router.push("/term") },
+        { text: "Privacy Policy", action: () => router.push("privacy") }, 
+        { text: "Terms of Service", action: () => router.push("term") },
       ],
     },
     { 
@@ -45,7 +45,7 @@ export default function Footer() {
       toggle: () => setShowCategories(!showCategories),
       items: categories.map((cat) => ({
         text: cat.name,
-        action: () => router.push(`/search?cat=${encodeURIComponent(cat.name)}`),
+        action: () => router.push(`shop1?category=${encodeURIComponent(cat.name)}`),
       })),
     },
   ];
