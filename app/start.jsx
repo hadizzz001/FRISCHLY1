@@ -4,7 +4,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
 	ActivityIndicator,
@@ -30,16 +30,7 @@ export default function Start() {
 
 	const screenHeight = Dimensions.get("window").height;
 
-	useEffect(() => {
-		const checkLogin = async () => {
-			const userData = await AsyncStorage.getItem("userData"); 
-			
-			if (userData) {
-				router.replace("/(tabs)");
-			}
-		};
-		checkLogin();
-	}, []);
+
 
 	const handleLogin = async () => {
 		if (!email || !password) {
@@ -49,34 +40,43 @@ export default function Start() {
 
 		setLoading(true);
 		try {
-			// ✅ call login-profile instead of login
 			const res = await axios.post(
 				"https://frischlyshop-server.onrender.com/api/auth/login-profile",
-				{
-					email,
-					password,
-				}
+				{ email, password }
 			);
 
-			console.log("Login response", res.data.data.token);
+			console.log("Login response:", res.data.data.user.emailConfirmed);
 
-			if (res.data) {
-				// ✅ save token and user info
-				await AsyncStorage.setItem("userData", JSON.stringify(res.data.data));
-				router.replace("/(tabs)");
+			const userData = res.data?.data;
+
+			// ✅ Check if user data exists and email is confirmed
+			if (userData) {
+				if (userData.user.emailConfirmed === true) {
+					// ✅ Save user data and redirect
+					await AsyncStorage.setItem("userData", JSON.stringify(userData));
+					router.replace("/(tabs)");
+				} else {
+					Alert.alert(
+						"Email Not Verified",
+						"Please verify your email before logging in."
+					);
+				}
+			} else {
+				Alert.alert("Login Failed", "Invalid email or password");
 			}
 		} catch (error) {
-			console.log("Login error", error.response?.data || error.message);
-			Alert.alert("Login Failed", "Invalid email or password");
+			console.log("Login error:", error.response?.data || error.message);
+			Alert.alert("Login Failed", "Invalid email or password or email not verfied");
 		} finally {
 			setLoading(false);
 		}
 	};
 
- 
-const inputBg = "#FFFFFF";
-const inputText = "#000000";
-const placeholderColor = "#666666";
+
+
+	const inputBg = "#FFFFFF";
+	const inputText = "#000000";
+	const placeholderColor = "#666666";
 
 
 	return (
@@ -219,10 +219,10 @@ const placeholderColor = "#666666";
 							router.replace("/(tabs)");
 						}}
 					>
-<Text style={{ fontSize: 16 }}>
-  <Text style={{ color: "#000" }}>Continue </Text>
-  <Text style={{ color: "#ffc300" }}>as guest</Text>
-</Text>
+						<Text style={{ fontSize: 16 }}>
+							<Text style={{ color: "#000" }}>Continue </Text>
+							<Text style={{ color: "#ffc300" }}>as guest</Text>
+						</Text>
 
 					</TouchableOpacity>
 				</View>
