@@ -224,7 +224,7 @@ const renderProduct = ({ item }) => {
     const discountAmount = (basePrice * discountPercent) / 100;
     const priceAfterDiscount = basePrice - discountAmount;
     const taxAmount = (priceAfterDiscount * taxPercent) / 100;
-    const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
+    const finalPrice = basePrice
 
     const isQtyVisible = showQty[item._id] || false;
 

@@ -93,15 +93,16 @@ export default function DiscountCarousel({ refreshTrigger }) {
 	}
 
 	const renderProduct = (product) => {
-		const basePrice = product.price || 0;
-		const discountPercent = product.discount || 0;
-		const taxPercent = product.tax || 0;
-		const bottleRefund = product.bottlerefund || 0;
+const basePrice = product.price || 0;
+const discountPercent = product.discount || 0;
 
-		const discountAmount = (basePrice * discountPercent) / 100;
-		const priceAfterDiscount = basePrice - discountAmount;
-		const taxAmount = (priceAfterDiscount * taxPercent) / 100;
-		const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
+// const finalPrice =
+// 	discountPercent > 0
+// 		? basePrice - (basePrice * discountPercent) / 100
+// 		: basePrice;
+
+const finalPrice = basePrice;
+
 
 		const isQtyVisible = showQty[product._id] || false;
 

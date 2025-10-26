@@ -149,7 +149,7 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 		const discountAmount = (basePrice * discountPercent) / 100;
 		const priceAfterDiscount = basePrice - discountAmount;
 		const taxAmount = (priceAfterDiscount * taxPercent) / 100;
-		const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
+		const finalPrice = basePrice
 
 		return (
 			<TouchableOpacity
