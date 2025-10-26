@@ -13,13 +13,14 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import Feather from "react-native-vector-icons/Feather";
 
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 const { width } = Dimensions.get("window");
-const ITEM_WIDTH = width / 2 - 20;
+const ITEM_WIDTH = width / 3 - 15;
 const LIMIT = 10; // items per fetch
 
 export default function ShopPage({ refreshTrigger, setRefreshing }) {
@@ -30,9 +31,36 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [page, setPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
-	const { cart } = useCart();
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
 	const [user, setUser] = useState(null);
+	// inside ShopPage component
+
+	const { addToCart, removeFromCart, cart } = useCart();
+	const [quantities, setQuantities] = useState({});
+	const [showQty, setShowQty] = useState({}); // track which products show quantity
+
+	const increaseQty = (product) => {
+		const newQty = (quantities[product._id] || 0) + 1;
+		setQuantities({ ...quantities, [product._id]: newQty });
+		addToCart(product, newQty);
+		setShowQty({ ...showQty, [product._id]: true });
+	};
+
+	const decreaseQty = (product) => {
+		const currentQty = quantities[product._id] || 0;
+		if (currentQty <= 1) {
+			const updatedQuantities = { ...quantities };
+			delete updatedQuantities[product._id];
+			setQuantities(updatedQuantities);
+			removeFromCart(product._id);
+			setShowQty({ ...showQty, [product._id]: false });
+		} else {
+			const newQty = currentQty - 1;
+			setQuantities({ ...quantities, [product._id]: newQty });
+			addToCart(product, newQty);
+		}
+	};
+
 
 	const token =
 		Constants.expoConfig?.extra?.jwtToken || process.env.EXPO_PUBLIC_JWT_TOKEN;
@@ -149,7 +177,32 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 				<Text style={styles.name} numberOfLines={2}>
 					{item.name}
 				</Text>
-				<Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
+
+				<View style={styles.priceRow}>
+					<Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
+				</View>
+
+				<View style={styles.qtyRow}>
+					{showQty[item._id] ? (
+						<>
+							<TouchableOpacity onPress={() => decreaseQty(item)} style={styles.qtyBtn}>
+								<Text style={styles.qtyText}>-</Text>
+							</TouchableOpacity>
+							<Text style={styles.qtyValue}>{quantities[item._id] || 1}</Text>
+							<TouchableOpacity onPress={() => increaseQty(item)} style={styles.qtyBtn}>
+								<Text style={styles.qtyText}>+</Text>
+							</TouchableOpacity>
+						</>
+					) : (
+						<TouchableOpacity
+							onPress={() => increaseQty(item)}
+							style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+						>
+							<Feather name="shopping-cart" size={20} color="#fff" />
+						</TouchableOpacity>
+					)}
+				</View>
+
 			</TouchableOpacity>
 		);
 	};
@@ -177,7 +230,7 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 				data={products}
 				keyExtractor={(item) => item._id}
 				renderItem={renderItem}
-				numColumns={2}
+				numColumns={3} // changed from 2 to 3
 				ListFooterComponent={
 					<>
 						{loadingMore && <ActivityIndicator style={{ margin: 20 }} />}
@@ -192,6 +245,7 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 					</>
 				}
 			/>
+
 		</View>
 	);
 }
@@ -199,6 +253,7 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 const styles = StyleSheet.create({
 	grid: { padding: 10 },
 	card: { width: ITEM_WIDTH, margin: 5, backgroundColor: "#fff", padding: 8 },
+
 	imageWrapper: {
 		position: "relative",
 		width: "100%",
@@ -250,4 +305,18 @@ const styles = StyleSheet.create({
 		fontWeight: "700",
 		fontSize: 16,
 	},
+	qtyRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginTop: 6,
+	},
+	qtyBtn: {
+		backgroundColor: "#ffc300",
+		paddingHorizontal: 8,
+		paddingVertical: 2,
+		borderRadius: 4,
+	},
+	qtyText: { fontSize: 14, fontWeight: "700", color: "#fff" },
+	qtyValue: { marginHorizontal: 6, fontSize: 14, fontWeight: "500", color: "#000" },
+
 });

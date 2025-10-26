@@ -19,23 +19,25 @@ import {
 } from "react-native";
 
 const { width } = Dimensions.get("window");
-const ITEM_WIDTH = width / 2 - 20;
+const ITEM_WIDTH = width / 3 - 13; // three items per row with spacing
 
 export default function ShopPage() {
 	const colorScheme = useColorScheme();
 	const router = useRouter();
 	const { category } = useLocalSearchParams();
-	const { cart } = useCart();
+	const { cart, addToCart, removeFromCart } = useCart(); // ✅ Cart context
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
 
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [groupedProducts, setGroupedProducts] = useState({});
+	const [quantities, setQuantities] = useState({});
+	const [showQty, setShowQty] = useState({}); // track which products show qty
 
 	const token =
 		Constants.expoConfig?.extra?.jwtToken || process.env.EXPO_PUBLIC_JWT_TOKEN;
 
-	// ✅ Fetch products by category
+	// Fetch products by category
 	const fetchProducts = async () => {
 		try {
 			setLoading(true);
@@ -62,12 +64,10 @@ export default function ShopPage() {
 	};
 
 	useEffect(() => {
-		if (category) {
-			fetchProducts();
-		}
+		if (category) fetchProducts();
 	}, [category]);
 
-	// ✅ Check login
+	// Check login
 	useEffect(() => {
 		const checkLogin = async () => {
 			const userData = await AsyncStorage.getItem("userData");
@@ -91,12 +91,34 @@ export default function ShopPage() {
 						setUser(data.data.user);
 					}
 				} catch (err) {
-					console.error("🔥 Network/Fetch error:", err);
+					console.error("Network/Fetch error:", err);
 				}
 			}
 		};
 		checkLogin();
 	}, []);
+
+	const increaseQty = (product) => {
+		const newQty = (quantities[product._id] || 0) + 1;
+		setQuantities({ ...quantities, [product._id]: newQty });
+		addToCart(product, newQty);
+		setShowQty({ ...showQty, [product._id]: true });
+	};
+
+	const decreaseQty = (product) => {
+		const currentQty = quantities[product._id] || 0;
+		if (currentQty <= 1) {
+			const updatedQuantities = { ...quantities };
+			delete updatedQuantities[product._id];
+			setQuantities(updatedQuantities);
+			removeFromCart(product._id);
+			setShowQty({ ...showQty, [product._id]: false });
+		} else {
+			const newQty = currentQty - 1;
+			setQuantities({ ...quantities, [product._id]: newQty });
+			addToCart(product, newQty);
+		}
+	};
 
 	const renderProduct = (item) => {
 		const basePrice = item.price || 0;
@@ -108,6 +130,8 @@ export default function ShopPage() {
 		const priceAfterDiscount = basePrice - discountAmount;
 		const taxAmount = (priceAfterDiscount * taxPercent) / 100;
 		const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
+
+		const isQtyVisible = showQty[item._id] || false;
 
 		return (
 			<TouchableOpacity
@@ -135,10 +159,41 @@ export default function ShopPage() {
 							</View>
 						)}
 					</View>
+
 					<Text style={styles.name} numberOfLines={2}>
 						{item.name}
 					</Text>
 					<Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
+
+					{/* Add to Cart / Quantity Selector */}
+					<View style={styles.qtyRow}>
+						{isQtyVisible ? (
+							<>
+								<TouchableOpacity
+									onPress={() => decreaseQty(item)}
+									style={styles.qtyBtn}
+								>
+									<Text style={styles.qtyText}>-</Text>
+								</TouchableOpacity>
+								<Text style={styles.qtyValue}>
+									{quantities[item._id] || 1}
+								</Text>
+								<TouchableOpacity
+									onPress={() => increaseQty(item)}
+									style={styles.qtyBtn}
+								>
+									<Text style={styles.qtyText}>+</Text>
+								</TouchableOpacity>
+							</>
+						) : (
+							<TouchableOpacity
+								onPress={() => increaseQty(item)}
+								style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+							>
+								<Feather name="shopping-cart" size={20} color="#fff" />
+							</TouchableOpacity>
+						)}
+					</View>
 				</View>
 			</TouchableOpacity>
 		);
@@ -212,8 +267,7 @@ const styles = StyleSheet.create({
 	card: {
 		width: ITEM_WIDTH,
 		marginBottom: 10,
-		padding: 4, // minimal padding
-		// ✅ Removed all background, border, and shadow
+		padding: 4,
 		backgroundColor: "transparent",
 		elevation: 0,
 		shadowColor: "transparent",
@@ -259,4 +313,18 @@ const styles = StyleSheet.create({
 		color: "#000",
 		textAlign: "center",
 	},
+	qtyRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginTop: 6,
+		justifyContent: "center",
+	},
+	qtyBtn: {
+		backgroundColor: "#FFC300",
+		paddingHorizontal: 8,
+		paddingVertical: 2,
+		borderRadius: 4,
+	},
+	qtyText: { fontSize: 14, fontWeight: "700", color: "#fff" },
+	qtyValue: { marginHorizontal: 6, fontSize: 14, fontWeight: "500", color: "#000" },
 });

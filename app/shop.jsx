@@ -24,7 +24,8 @@ import { useCart } from "@/contexts/CartContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 const { width } = Dimensions.get("window");
-const ITEM_WIDTH = width / 2 - 20;
+const ITEM_WIDTH = width / 3 - 12; // 3 items per row, adjust margin
+
 
 export default function ShopPage() {
 	const colorScheme = useColorScheme();
@@ -39,8 +40,7 @@ export default function ShopPage() {
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [categories, setCategories] = useState([]);
 	const [products, setProducts] = useState([]);
-	const [loading, setLoading] = useState(true);
-	const { cart } = useCart();
+	const [loading, setLoading] = useState(true); 
 	const { isBooleanValue, setBooleanValue } = useBooleanValue();
 	const [user, setUser] = useState(null);
 	const [filterOpen, setFilterOpen] = useState(false);
@@ -61,6 +61,34 @@ export default function ShopPage() {
 		discount: false,
 		minDiscount: 5,
 	});
+	// Inside ShopPage component
+
+const { cart, addToCart, removeFromCart } = useCart();
+const [quantities, setQuantities] = useState({});
+const [showQty, setShowQty] = useState({}); // Track which products show qty
+
+const increaseQty = (product) => {
+    const newQty = (quantities[product._id] || 0) + 1;
+    setQuantities({ ...quantities, [product._id]: newQty });
+    addToCart(product, newQty);
+    setShowQty({ ...showQty, [product._id]: true });
+};
+
+const decreaseQty = (product) => {
+    const currentQty = quantities[product._id] || 0;
+    if (currentQty <= 1) {
+        const updatedQuantities = { ...quantities };
+        delete updatedQuantities[product._id];
+        setQuantities(updatedQuantities);
+        removeFromCart(product._id);
+        setShowQty({ ...showQty, [product._id]: false });
+    } else {
+        const newQty = currentQty - 1;
+        setQuantities({ ...quantities, [product._id]: newQty });
+        addToCart(product, newQty);
+    }
+};
+
 
 	const token =
 		Constants.expoConfig?.extra?.jwtToken || process.env.EXPO_PUBLIC_JWT_TOKEN;
@@ -187,56 +215,78 @@ export default function ShopPage() {
 		fetchProducts(nextPage, false); // append instead of replace
 	};
 
-	const renderProduct = ({ item }) => {
-		const basePrice = item.price || 0;
-		const discountPercent = item.discount || 0;
-		const taxPercent = item.tax || 0;
-		const bottleRefund = item.bottlerefund || 0;
+const renderProduct = ({ item }) => {
+    const basePrice = item.price || 0;
+    const discountPercent = item.discount || 0;
+    const taxPercent = item.tax || 0;
+    const bottleRefund = item.bottlerefund || 0;
 
-		const discountAmount = (basePrice * discountPercent) / 100;
-		const priceAfterDiscount = basePrice - discountAmount;
-		const taxAmount = (priceAfterDiscount * taxPercent) / 100;
-		const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
+    const discountAmount = (basePrice * discountPercent) / 100;
+    const priceAfterDiscount = basePrice - discountAmount;
+    const taxAmount = (priceAfterDiscount * taxPercent) / 100;
+    const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
 
-		return (
-			<TouchableOpacity
-				onPress={() => router.push(`/product/${item._id}`)}
-				activeOpacity={0.8}
-			>
-				<View style={styles.card}>
-					<View style={styles.imageWrapper}>
-						<Image
-							source={{
-								uri: item.picture || "https://via.placeholder.com/150",
-							}}
-							style={styles.image}
-							resizeMode="contain"
-						/>
+    const isQtyVisible = showQty[item._id] || false;
 
-						{item.stock === 0 && (
-							<View style={styles.overlay}>
-								<Text style={styles.outOfStockText}>Out of Stock</Text>
-							</View>
-						)}
+    return (
+        <View style={styles.card}>
+            <TouchableOpacity
+                onPress={() => router.push(`/product/${item._id}`)}
+                activeOpacity={0.8}
+            >
+                <View style={styles.imageWrapper}>
+                    <Image
+                        source={{ uri: item.picture || "https://via.placeholder.com/150" }}
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
+                    {item.stock === 0 && (
+                        <View style={styles.overlay}>
+                            <Text style={styles.outOfStockText}>Out of Stock</Text>
+                        </View>
+                    )}
+                    {discountPercent > 0 && (
+                        <View style={styles.discountBadge}>
+                            <Text style={styles.discountText}>-{discountPercent}%</Text>
+                        </View>
+                    )}
+                </View>
 
-						{discountPercent > 0 && (
-							<View style={styles.discountBadge}>
-								<Text style={styles.discountText}>-{discountPercent}%</Text>
-							</View>
-						)}
-					</View>
+                <Text style={styles.name} numberOfLines={2}>
+                    {item.name}
+                </Text>
 
-					<Text style={styles.name} numberOfLines={2}>
-						{item.name}
-					</Text>
+                <View style={styles.priceRow}>
+                    <Text style={styles.newPrice}>€{finalPrice.toFixed(2)}</Text>
+                </View>
+            </TouchableOpacity>
 
-					<View style={styles.priceDetails}>
-						<Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
-					</View>
-				</View>
-			</TouchableOpacity>
-		);
-	};
+            {/* Add to Cart / Quantity Selector */}
+            <View style={styles.qtyRow}>
+                {isQtyVisible ? (
+                    <View style={styles.qtyContainer}>
+                        <TouchableOpacity onPress={() => decreaseQty(item)} style={styles.qtyBtn}>
+                            <Text style={styles.qtyText}>-</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.qtyValue}>{quantities[item._id] || 1}</Text>
+                        <TouchableOpacity onPress={() => increaseQty(item)} style={styles.qtyBtn}>
+                            <Text style={styles.qtyText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <TouchableOpacity
+                        onPress={() => increaseQty(item)}
+                        style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+                    >
+                        <Feather name="shopping-cart" size={20} color="#fff" />
+                    </TouchableOpacity>
+                )}
+            </View>
+        </View>
+    );
+};
+
+
 
 	if (loading) {
 		return (
@@ -322,19 +372,21 @@ export default function ShopPage() {
 			</View>
 
 			{/* Products Grid */}
-			<FlatList
-				data={products}
-				keyExtractor={(item) => item._id}
-				renderItem={renderProduct}
-				numColumns={2}
-				onEndReached={loadMore}
-				onEndReachedThreshold={0.3}
-				ListFooterComponent={
-					isFetchingMore ? (
-						<ActivityIndicator size="small" color="#ffc300" />
-					) : null
-				}
-			/>
+<FlatList
+    data={products}
+    keyExtractor={(item) => item._id}
+    renderItem={renderProduct}
+    numColumns={3} // <-- 3 items per row
+    onEndReached={loadMore}
+    onEndReachedThreshold={0.3}
+    ListFooterComponent={
+        isFetchingMore ? (
+            <ActivityIndicator size="small" color="#ffc300" />
+        ) : null
+    }
+    contentContainerStyle={{ paddingHorizontal: 8 }}
+/>
+
 
 			{/* ✅ Filter Overlay */}
 			{filterOpen && (
@@ -475,12 +527,13 @@ const styles = StyleSheet.create({
 	},
 	categoryText: { fontSize: 14, fontWeight: "500", color: "#000000" },
 	grid: { padding: 10 },
-	card: {
-		width: ITEM_WIDTH,
-		margin: 5,
-		backgroundColor: "#FFFFFF",
-		padding: 8,
-	},
+card: { 
+    width: ITEM_WIDTH,
+    margin: 4, // smaller margin for 3 items per row
+    backgroundColor: "#FFFFFF",
+    padding: 8, 
+},
+
 	imageWrapper: {
 		position: "relative",
 		width: "100%",
@@ -666,4 +719,28 @@ const styles = StyleSheet.create({
 		backgroundColor: "#ffc300",
 		borderColor: "#ffc300",
 	},
+	qtyRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 6,
+},
+
+qtyContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+},
+
+qtyBtn: {
+    backgroundColor: "#ffc300",
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginHorizontal: 4,
+},
+
+qtyText: { color: "#000", fontSize: 16, fontWeight: "700" },
+qtyValue: { marginHorizontal: 4, fontSize: 14, fontWeight: "700" },
+
 });

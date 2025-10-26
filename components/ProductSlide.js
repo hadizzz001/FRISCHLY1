@@ -1,5 +1,7 @@
+import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import {
 	ActivityIndicator,
 	Dimensions,
@@ -14,7 +16,7 @@ import Feather from "react-native-vector-icons/Feather";
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 3 - 12; // Show exactly 3 per row
-const ITEM_HEIGHT = 155;
+const ITEM_HEIGHT = 180;
 
 export default function DiscountCarousel({ refreshTrigger }) {
 	const router = useRouter();
@@ -22,6 +24,9 @@ export default function DiscountCarousel({ refreshTrigger }) {
 	const [loading, setLoading] = useState(true);
 	const flatListRef = useRef(null);
 	const [currentIndex, setCurrentIndex] = useState(0);
+	const { addToCart, removeFromCart, cart } = useCart();
+	const [quantities, setQuantities] = useState({});
+	const [showQty, setShowQty] = useState({}); // Track which products show qty
 
 	const fetchDiscountProducts = async () => {
 		try {
@@ -49,23 +54,28 @@ export default function DiscountCarousel({ refreshTrigger }) {
 		}
 	}, [refreshTrigger]);
 
-	// ✅ Auto Slider Effect
-	useEffect(() => {
-		if (!discountedProducts.length) return;
-		const interval = setInterval(() => {
-			let nextIndex = currentIndex + 1;
-			if (nextIndex >= discountedProducts.length) nextIndex = 0;
+	const increaseQty = (product) => {
+		const newQty = (quantities[product._id] || 0) + 1;
+		setQuantities({ ...quantities, [product._id]: newQty });
+		addToCart(product, newQty);
+		setShowQty({ ...showQty, [product._id]: true });
+	};
 
-			flatListRef.current?.scrollToOffset({
-				offset: nextIndex * ITEM_WIDTH,
-				animated: true,
-			});
-
-			setCurrentIndex(nextIndex);
-		}, 2000);
-
-		return () => clearInterval(interval);
-	}, [currentIndex, discountedProducts]);
+	const decreaseQty = (product) => {
+		const currentQty = quantities[product._id] || 0;
+		if (currentQty <= 1) {
+			// Remove from cart and hide qty
+			const updatedQuantities = { ...quantities };
+			delete updatedQuantities[product._id];
+			setQuantities(updatedQuantities);
+			removeFromCart(product._id);
+			setShowQty({ ...showQty, [product._id]: false });
+		} else {
+			const newQty = currentQty - 1;
+			setQuantities({ ...quantities, [product._id]: newQty });
+			addToCart(product, newQty);
+		}
+	};
 
 	if (loading) {
 		return (
@@ -93,6 +103,8 @@ export default function DiscountCarousel({ refreshTrigger }) {
 		const taxAmount = (priceAfterDiscount * taxPercent) / 100;
 		const finalPrice = priceAfterDiscount + taxAmount + bottleRefund;
 
+		const isQtyVisible = showQty[product._id] || false;
+
 		return (
 			<TouchableOpacity
 				key={product._id}
@@ -108,7 +120,6 @@ export default function DiscountCarousel({ refreshTrigger }) {
 						style={styles.image}
 						resizeMode="contain"
 					/>
-
 					{product.stock === 0 && (
 						<View style={styles.overlay}>
 							<Text style={styles.outOfStockText}>Out of Stock</Text>
@@ -120,22 +131,50 @@ export default function DiscountCarousel({ refreshTrigger }) {
 						</View>
 					)}
 				</View>
+
+				<Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+					{product.name}
+				</Text>
+
 				<View style={styles.priceRow}>
 					<Text style={styles.newPrice}>€{finalPrice.toFixed(2)}</Text>
 				</View>
-				<Text
-					style={styles.name}
-					numberOfLines={1}
-					ellipsizeMode="tail" // ✅ Cut long titles with ...
-				>
-					{product.name}
-				</Text>
+
+				{/* Quantity Selector or Add to Cart */}
+				<View style={styles.qtyRow}>
+					{isQtyVisible ? (
+						<>
+							<TouchableOpacity
+								onPress={() => decreaseQty(product)}
+								style={styles.qtyBtn}
+							>
+								<Text style={styles.qtyText}>-</Text>
+							</TouchableOpacity>
+							<Text style={styles.qtyValue}>
+								{quantities[product._id] || 1}
+							</Text>
+							<TouchableOpacity
+								onPress={() => increaseQty(product)}
+								style={styles.qtyBtn}
+							>
+								<Text style={styles.qtyText}>+</Text>
+							</TouchableOpacity>
+						</>
+					) : (
+						<TouchableOpacity
+							onPress={() => increaseQty(product)}
+							style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+						>
+							<Feather name="shopping-cart" size={20} color="#fff" />
+						</TouchableOpacity>
+					)}
+				</View>
 			</TouchableOpacity>
 		);
 	};
 
 	return (
-		<View style={{ height: ITEM_HEIGHT + 50, backgroundColor: "#FFFFFF" }}>
+		<View style={{ height: ITEM_HEIGHT + 80, backgroundColor: "#FFFFFF" }}>
 			<View style={styles.header}>
 				<Text style={styles.headerText}>Hot Sales</Text>
 				<View style={styles.headerRight}>
@@ -174,11 +213,10 @@ const styles = StyleSheet.create({
 		marginHorizontal: 4,
 		backgroundColor: "#FFFFFF",
 		padding: 8,
-		height: 160,
-		position: "relative", // ✅ Required for absolute positioning inside
+		height: 200,
 		overflow: "hidden",
+		borderRadius: 8,
 	},
-
 	imageWrapper: {
 		position: "relative",
 		width: "100%",
@@ -212,7 +250,6 @@ const styles = StyleSheet.create({
 	},
 	discountText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
 	name: { fontSize: 14, fontWeight: "400", marginBottom: 4, color: "#777" },
-
 	header: {
 		flexDirection: "row",
 		justifyContent: "space-between",
@@ -229,14 +266,28 @@ const styles = StyleSheet.create({
 		paddingVertical: 6,
 	},
 	allText: { fontSize: 18, fontWeight: "500", color: "#777" },
-	priceRow: {
-		position: "absolute",
-		bottom: 8,
-		left: 8,
+	priceRow: { marginTop: 4 },
+	newPrice: { fontSize: 13, fontWeight: "500", color: "#000000" },
+	qtyRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginTop: 6,
 	},
-	newPrice: {
-		fontSize: 13,
+	qtyBtn: {
+		backgroundColor: "#FFC300",
+		paddingHorizontal: 8,
+		paddingVertical: 2,
+		borderRadius: 4,
+	},
+	qtyText: {
+		fontSize: 14,
+		fontWeight: "700",
+		color: "#fff",
+	},
+	qtyValue: {
+		marginHorizontal: 6,
+		fontSize: 14,
 		fontWeight: "500",
-		color: "#000000",
+		color: "#000",
 	},
 });
