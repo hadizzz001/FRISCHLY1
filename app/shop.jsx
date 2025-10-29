@@ -68,14 +68,24 @@ const [quantities, setQuantities] = useState({});
 const [showQty, setShowQty] = useState({}); // Track which products show qty
 
 const increaseQty = (product) => {
-    const newQty = (quantities[product._id] || 0) + 1;
+    const currentQty = quantities[product._id] || 0;
+
+    // ✅ Do not allow exceeding stock
+    if (currentQty >= product.stock) {
+        return; // Stop here if qty == stock
+    }
+
+    const newQty = currentQty + 1;
     setQuantities({ ...quantities, [product._id]: newQty });
+
     addToCart(product, newQty);
     setShowQty({ ...showQty, [product._id]: true });
 };
 
+
 const decreaseQty = (product) => {
     const currentQty = quantities[product._id] || 0;
+
     if (currentQty <= 1) {
         const updatedQuantities = { ...quantities };
         delete updatedQuantities[product._id];
@@ -85,9 +95,11 @@ const decreaseQty = (product) => {
     } else {
         const newQty = currentQty - 1;
         setQuantities({ ...quantities, [product._id]: newQty });
+
         addToCart(product, newQty);
     }
 };
+
 
 
 	const token =
@@ -236,15 +248,16 @@ const renderProduct = ({ item }) => {
             >
                 <View style={styles.imageWrapper}>
                     <Image
-                        source={{ uri: item.picture || "https://via.placeholder.com/150" }}
+                        source={{ uri: item.picture   }}
                         style={styles.image}
                         resizeMode="contain"
                     />
-                    {item.stock === 0 && (
-                        <View style={styles.overlay}>
-                            <Text style={styles.outOfStockText}>Out of Stock</Text>
-                        </View>
-                    )}
+{item.stock === 0 && (
+    <View style={styles.outOfStockOverlay}>
+        <Text style={styles.outOfStockText}>OUT OF STOCK</Text>
+    </View>
+)}
+
                     {discountPercent > 0 && (
                         <View style={styles.discountBadge}>
                             <Text style={styles.discountText}>-{discountPercent}%</Text>
@@ -261,27 +274,32 @@ const renderProduct = ({ item }) => {
                 </View>
             </TouchableOpacity>
 
-            {/* Add to Cart / Quantity Selector */}
-            <View style={styles.qtyRow}>
-                {isQtyVisible ? (
-                    <View style={styles.qtyContainer}>
-                        <TouchableOpacity onPress={() => decreaseQty(item)} style={styles.qtyBtn}>
-                            <Text style={styles.qtyText}>-</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.qtyValue}>{quantities[item._id] || 1}</Text>
-                        <TouchableOpacity onPress={() => increaseQty(item)} style={styles.qtyBtn}>
-                            <Text style={styles.qtyText}>+</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <TouchableOpacity
-                        onPress={() => increaseQty(item)}
-                        style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
-                    >
-                        <Feather name="shopping-cart" size={20} color="#fff" />
-                    </TouchableOpacity>
-                )}
-            </View>
+{/* Add to Cart / Quantity Selector */}
+{item.stock > 0 && (
+	<View style={styles.qtyRow}>
+		{isQtyVisible ? (
+			<View style={styles.qtyContainer}>
+				<TouchableOpacity onPress={() => decreaseQty(item)} style={styles.qtyBtn}>
+					<Text style={styles.qtyText}>-</Text>
+				</TouchableOpacity>
+
+				<Text style={styles.qtyValue}>{quantities[item._id] || 1}</Text>
+
+				<TouchableOpacity onPress={() => increaseQty(item)} style={styles.qtyBtn}>
+					<Text style={styles.qtyText}>+</Text>
+				</TouchableOpacity>
+			</View>
+		) : (
+			<TouchableOpacity
+				onPress={() => increaseQty(item)}
+				style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+			>
+				<Feather name="shopping-cart" size={20} color="#fff" />
+			</TouchableOpacity>
+		)}
+	</View>
+)}
+
         </View>
     );
 };
@@ -389,8 +407,9 @@ const renderProduct = ({ item }) => {
 
 
 			{/* ✅ Filter Overlay */}
-			{filterOpen && (
-				<View style={[styles.overlay, { left: width * 0.3 }]}>
+{filterOpen && (
+	<View style={[styles.filterOverlay, { left: width * 0.3 }]}>
+
 					{/* Close button */}
 					<TouchableOpacity
 						style={styles.closeBtn}
@@ -547,11 +566,11 @@ card: {
 		left: 0,
 		right: 0,
 		bottom: 0,
-		backgroundColor: "#FFFFFF",
+		backgroundColor: "transparent",
 		zIndex: 100,
 		paddingTop: 60,
 	},
-	outOfStockText: { color: "#FFFFFF", fontWeight: "700", fontSize: 16 },
+ 
 	discountBadge: {
 		position: "absolute",
 		top: 8,
@@ -742,5 +761,47 @@ qtyBtn: {
 
 qtyText: { color: "#000", fontSize: 16, fontWeight: "700" },
 qtyValue: { marginHorizontal: 4, fontSize: 14, fontWeight: "700" },
+
+imageWrapper: {
+	position: "relative",
+	width: "100%",
+	height: 150,
+	marginBottom: 6,
+},
+
+image: { width: "100%", height: "100%" },
+
+// ✅ Overlay on product image (transparent dark layer)
+outOfStockOverlay: {
+	position: "absolute",
+	top: 0,
+	left: 0,
+	right: 0,
+	bottom: 0,
+	backgroundColor: "rgba(0,0,0,0.55)",
+	justifyContent: "center",
+	alignItems: "center",
+	zIndex: 10,
+},
+
+outOfStockText: {
+	color: "#fff",
+	fontWeight: "700",
+	fontSize: 16,
+	textAlign: "center",
+},
+
+// ✅ Overlay for filter screen (white background)
+filterOverlay: {
+	position: "absolute",
+	top: 0,
+	left: 0,
+	right: 0,
+	bottom: 0,
+	backgroundColor: "rgba(255,255,255,1)",
+	zIndex: 100,
+	paddingTop: 50,
+},
+
 
 });

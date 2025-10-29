@@ -54,12 +54,21 @@ export default function DiscountCarousel({ refreshTrigger }) {
 		}
 	}, [refreshTrigger]);
 
-	const increaseQty = (product) => {
-		const newQty = (quantities[product._id] || 0) + 1;
-		setQuantities({ ...quantities, [product._id]: newQty });
-		addToCart(product, newQty);
-		setShowQty({ ...showQty, [product._id]: true });
-	};
+const increaseQty = (product) => {
+  const currentQty = quantities[product._id] || 0;
+
+  // ✅ Check stock before increase
+  if (currentQty >= product.stock) {
+    return; // Do nothing if max stock reached
+  }
+
+  const newQty = currentQty + 1;
+  setQuantities({ ...quantities, [product._id]: newQty });
+
+  addToCart(product, newQty);
+  setShowQty({ ...showQty, [product._id]: true });
+};
+
 
 	const decreaseQty = (product) => {
 		const currentQty = quantities[product._id] || 0;
@@ -141,35 +150,39 @@ const finalPrice = basePrice;
 					<Text style={styles.newPrice}>€{finalPrice.toFixed(2)}</Text>
 				</View>
 
-				{/* Quantity Selector or Add to Cart */}
-				<View style={styles.qtyRow}>
-					{isQtyVisible ? (
-						<>
-							<TouchableOpacity
-								onPress={() => decreaseQty(product)}
-								style={styles.qtyBtn}
-							>
-								<Text style={styles.qtyText}>-</Text>
-							</TouchableOpacity>
-							<Text style={styles.qtyValue}>
-								{quantities[product._id] || 1}
-							</Text>
-							<TouchableOpacity
-								onPress={() => increaseQty(product)}
-								style={styles.qtyBtn}
-							>
-								<Text style={styles.qtyText}>+</Text>
-							</TouchableOpacity>
-						</>
-					) : (
-						<TouchableOpacity
-							onPress={() => increaseQty(product)}
-							style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
-						>
-							<Feather name="shopping-cart" size={20} color="#fff" />
-						</TouchableOpacity>
-					)}
-				</View>
+{/* Quantity Selector or Add to Cart (Hidden if Out of Stock) */}
+{product.stock > 0 && (
+  <View style={styles.qtyRow}>
+    {isQtyVisible ? (
+      <>
+        <TouchableOpacity onPress={() => decreaseQty(product)} style={styles.qtyBtn}>
+          <Text style={styles.qtyText}>-</Text>
+        </TouchableOpacity>
+<Text style={styles.qtyValue}>{quantities[product._id]}</Text>
+
+<TouchableOpacity
+  onPress={() => increaseQty(product)}
+  style={[
+    styles.qtyBtn,
+    quantities[product._id] >= product.stock && { opacity: 0.3 }, // visual disabled
+  ]}
+  disabled={quantities[product._id] >= product.stock} // ✅ disables the button
+>
+  <Text style={styles.qtyText}>+</Text>
+</TouchableOpacity>
+
+      </>
+    ) : (
+      <TouchableOpacity
+        onPress={() => increaseQty(product)}
+        style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+      >
+        <Feather name="shopping-cart" size={20} color="#fff" />
+      </TouchableOpacity>
+    )}
+  </View>
+)}
+
 			</TouchableOpacity>
 		);
 	};

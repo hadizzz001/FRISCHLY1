@@ -39,27 +39,37 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 	const [quantities, setQuantities] = useState({});
 	const [showQty, setShowQty] = useState({}); // track which products show quantity
 
-	const increaseQty = (product) => {
-		const newQty = (quantities[product._id] || 0) + 1;
+const increaseQty = (product) => {
+	const currentQty = quantities[product._id] || 0;
+
+	// ✅ STOP IF REACH STOCK LIMIT
+	if (currentQty >= product.stock) {
+		return; // or Alert.alert("Stock limit reached")
+	}
+
+	const newQty = currentQty + 1;
+	setQuantities({ ...quantities, [product._id]: newQty });
+	addToCart(product, newQty);
+	setShowQty({ ...showQty, [product._id]: true });
+};
+
+
+const decreaseQty = (product) => {
+	const currentQty = quantities[product._id] || 0;
+
+	if (currentQty <= 1) {
+		const updatedQuantities = { ...quantities };
+		delete updatedQuantities[product._id];
+		setQuantities(updatedQuantities);
+		removeFromCart(product._id);
+		setShowQty({ ...showQty, [product._id]: false });
+	} else {
+		const newQty = currentQty - 1;
 		setQuantities({ ...quantities, [product._id]: newQty });
 		addToCart(product, newQty);
-		setShowQty({ ...showQty, [product._id]: true });
-	};
+	}
+};
 
-	const decreaseQty = (product) => {
-		const currentQty = quantities[product._id] || 0;
-		if (currentQty <= 1) {
-			const updatedQuantities = { ...quantities };
-			delete updatedQuantities[product._id];
-			setQuantities(updatedQuantities);
-			removeFromCart(product._id);
-			setShowQty({ ...showQty, [product._id]: false });
-		} else {
-			const newQty = currentQty - 1;
-			setQuantities({ ...quantities, [product._id]: newQty });
-			addToCart(product, newQty);
-		}
-	};
 
 
 	const token =
@@ -182,26 +192,30 @@ export default function ShopPage({ refreshTrigger, setRefreshing }) {
 					<Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
 				</View>
 
-				<View style={styles.qtyRow}>
-					{showQty[item._id] ? (
-						<>
-							<TouchableOpacity onPress={() => decreaseQty(item)} style={styles.qtyBtn}>
-								<Text style={styles.qtyText}>-</Text>
-							</TouchableOpacity>
-							<Text style={styles.qtyValue}>{quantities[item._id] || 1}</Text>
-							<TouchableOpacity onPress={() => increaseQty(item)} style={styles.qtyBtn}>
-								<Text style={styles.qtyText}>+</Text>
-							</TouchableOpacity>
-						</>
-					) : (
-						<TouchableOpacity
-							onPress={() => increaseQty(item)}
-							style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
-						>
-							<Feather name="shopping-cart" size={20} color="#fff" />
-						</TouchableOpacity>
-					)}
-				</View>
+{/* Quantity buttons only if product is in stock */}
+{item.stock > 0 && (
+	<View style={styles.qtyRow}>
+		{showQty[item._id] ? (
+			<>
+				<TouchableOpacity onPress={() => decreaseQty(item)} style={styles.qtyBtn}>
+					<Text style={styles.qtyText}>-</Text>
+				</TouchableOpacity>
+				<Text style={styles.qtyValue}>{quantities[item._id] || 1}</Text>
+				<TouchableOpacity onPress={() => increaseQty(item)} style={styles.qtyBtn}>
+					<Text style={styles.qtyText}>+</Text>
+				</TouchableOpacity>
+			</>
+		) : (
+			<TouchableOpacity
+				onPress={() => increaseQty(item)}
+				style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+			>
+				<Feather name="shopping-cart" size={20} color="#fff" />
+			</TouchableOpacity>
+		)}
+	</View>
+)}
+
 
 			</TouchableOpacity>
 		);

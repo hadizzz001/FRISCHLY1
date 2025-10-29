@@ -148,7 +148,7 @@ const CheckoutPage = ({ items, customer }) => {
         notes: "Order placed from mobile app",
       };
 
-      const orderRes = await fetch("https://frischly-server.onrender.com/api/orders", {
+      const orderRes = await fetch("https://frischlyshop-server.onrender.com/api/orders", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(orderPayload),

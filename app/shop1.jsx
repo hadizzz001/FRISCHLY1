@@ -98,12 +98,17 @@ export default function ShopPage() {
 		checkLogin();
 	}, []);
 
-	const increaseQty = (product) => {
-		const newQty = (quantities[product._id] || 0) + 1;
-		setQuantities({ ...quantities, [product._id]: newQty });
-		addToCart(product, newQty);
-		setShowQty({ ...showQty, [product._id]: true });
-	};
+const increaseQty = (product) => {
+	const currentQty = quantities[product._id] || 0;
+	// Do not allow increasing beyond stock
+	if (currentQty >= product.stock) return;
+
+	const newQty = currentQty + 1;
+	setQuantities({ ...quantities, [product._id]: newQty });
+	addToCart(product, newQty);
+	setShowQty({ ...showQty, [product._id]: true });
+};
+
 
 	const decreaseQty = (product) => {
 		const currentQty = quantities[product._id] || 0;
@@ -159,41 +164,50 @@ export default function ShopPage() {
 							</View>
 						)}
 					</View>
-
+ 
 					<Text style={styles.name} numberOfLines={2}>
 						{item.name}
 					</Text>
 					<Text style={styles.finalPrice}>€{finalPrice.toFixed(2)}</Text>
 
 					{/* Add to Cart / Quantity Selector */}
-					<View style={styles.qtyRow}>
-						{isQtyVisible ? (
-							<>
-								<TouchableOpacity
-									onPress={() => decreaseQty(item)}
-									style={styles.qtyBtn}
-								>
-									<Text style={styles.qtyText}>-</Text>
-								</TouchableOpacity>
-								<Text style={styles.qtyValue}>
-									{quantities[item._id] || 1}
-								</Text>
-								<TouchableOpacity
-									onPress={() => increaseQty(item)}
-									style={styles.qtyBtn}
-								>
-									<Text style={styles.qtyText}>+</Text>
-								</TouchableOpacity>
-							</>
-						) : (
-							<TouchableOpacity
-								onPress={() => increaseQty(item)}
-								style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
-							>
-								<Feather name="shopping-cart" size={20} color="#fff" />
-							</TouchableOpacity>
-						)}
-					</View>
+<View style={styles.qtyRow}>
+	{item.stock > 0 ? ( // Only show if stock > 0
+		isQtyVisible ? (
+			<>
+				<TouchableOpacity
+					onPress={() => decreaseQty(item)}
+					style={styles.qtyBtn}
+				>
+					<Text style={styles.qtyText}>-</Text>
+				</TouchableOpacity>
+
+				<Text style={styles.qtyValue}>
+					{quantities[item._id] || 1}
+				</Text>
+
+				<TouchableOpacity
+					onPress={() => increaseQty(item)}
+					style={[
+						styles.qtyBtn,
+						quantities[item._id] >= item.stock && { opacity: 0.5 } // visually disable
+					]}
+					disabled={quantities[item._id] >= item.stock} // actually disable button
+				>
+					<Text style={styles.qtyText}>+</Text>
+				</TouchableOpacity>
+			</>
+		) : (
+			<TouchableOpacity
+				onPress={() => increaseQty(item)}
+				style={[styles.qtyBtn, { paddingHorizontal: 12, paddingVertical: 6 }]}
+			>
+				<Feather name="shopping-cart" size={20} color="#fff" />
+			</TouchableOpacity>
+		)
+	) : null}
+</View>
+
 				</View>
 			</TouchableOpacity>
 		);
