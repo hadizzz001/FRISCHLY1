@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Image, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function Header() {
@@ -18,7 +18,7 @@ export default function Header() {
       {/* <TouchableOpacity onPress={() => router.push("/(tabs)")}> */}
         <Image
           source={{
-            uri: "https://res.cloudinary.com/dtzuor7no/image/upload/v1757762617/logo1_qjt9ff.webp",
+            uri: "https://res.cloudinary.com/dtzuor7no/image/upload/v1762515215/LOGO_frischly2_page-0003-removebg-preview_ek6ugj.png",
           }}
           style={styles.logo}
           resizeMode="contain"

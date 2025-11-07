@@ -7,17 +7,17 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-	Alert,
-	Dimensions,
-	Image,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	useColorScheme,
-	View,
+    Alert,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 
 // -------------------------
@@ -194,7 +194,7 @@ const placeholderColor = "#666666";
 				>
 					<Image
 						source={{
-							uri: "https://res.cloudinary.com/dtzuor7no/image/upload/v1757763354/logo1z_phciva.webp",
+							uri: "https://res.cloudinary.com/dtzuor7no/image/upload/v1762515371/LOGO_frischly2_page-0002-removebg-preview_achbk6.png",
 						}}
 						style={{ width: 200, height: 200 }}
 						resizeMode="contain"

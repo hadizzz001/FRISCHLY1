@@ -4,12 +4,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Linking,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Svg, { G, Path } from "react-native-svg";
 
@@ -62,9 +62,9 @@ export default function CheckoutSuccessPage() {
     checkLoginAndFetchOrders();
   }, []);
 
-//   useEffect(() => {
-//     clearCart();
-//   }, []);
+  useEffect(() => {
+    clearCart();
+  }, []);
 
   if (loading) return <Text>Loading...</Text>;
 
