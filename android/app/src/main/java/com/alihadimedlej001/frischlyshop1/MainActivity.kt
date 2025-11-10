@@ -1,4 +1,4 @@
-package com.alihadimedlej001.myMob
+package com.alihadimedlej001.frischlyshop1
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
