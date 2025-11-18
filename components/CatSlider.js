@@ -1,3 +1,4 @@
+import { useTranslation } from "@/contexts/TranslationContext";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -17,6 +18,8 @@ const ITEM_WIDTH = width / 4 - 15; // 4 items per row
 const ITEM_HEIGHT = 130;
 
 export default function CategoriesGrid({ refreshTrigger }) {
+	const { t } = useTranslation();
+
 	const router = useRouter();
 	const [categories, setCategories] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -64,7 +67,7 @@ export default function CategoriesGrid({ refreshTrigger }) {
 	const renderCategory = ({ item: category }) => (
 		<TouchableOpacity
 			key={category._id}
-			onPress={() => router.push(`/shop1?category=${category.name}`)}
+			onPress={() => router.push(`/shop1?category=${encodeURIComponent(category.name)}`)}
 			activeOpacity={0.8}
 			style={styles.card}
 		>
@@ -84,13 +87,13 @@ export default function CategoriesGrid({ refreshTrigger }) {
 	return (
 		<View style={{ backgroundColor: "#fff", marginTop: 30, paddingBottom: 20 }}>
 			<View style={styles.header}>
-				<Text style={styles.headerText}>Shop by Category</Text>
+				<Text style={styles.headerText}>{t("shopByCategory")}</Text>
 				<View style={styles.headerRight}>
 					<TouchableOpacity
 						style={styles.allButton}
 						onPress={() => router.push("/shop")}
 					>
-						<Text style={styles.allText}>All</Text>
+						<Text style={styles.allText}>{t("all")}</Text>
 					</TouchableOpacity>
 					<TouchableOpacity onPress={() => router.push("/shop")}>
 						<Feather name="chevron-right" size={24} color="#777" />

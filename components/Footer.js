@@ -1,7 +1,8 @@
-import { AntDesign } from "@expo/vector-icons";
+import { useTranslation } from "@/contexts/TranslationContext";
+import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // or next/navigation / @react-navigation/native
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Footer() {
   const [categories, setCategories] = useState([]);
@@ -9,6 +10,8 @@ export default function Footer() {
   const [showCustomerCare, setShowCustomerCare] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const router = useRouter();
+    const { t } = useTranslation();
+  
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -25,22 +28,22 @@ export default function Footer() {
 
   const sections = [
     {
-      label: "Policies",
+      label: t("policies"),
       isOpen: showPolicies,
       toggle: () => setShowPolicies(!showPolicies),
       items: [
-        { text: "Privacy Policy", action: () => router.push("privacy") }, 
-        { text: "Terms of Service", action: () => router.push("term") },
+        { text: t("privacyPolicy"), action: () => router.push("privacy") }, 
+        { text: t("termsOfService"), action: () => router.push("term") },
       ],
     },
     { 
-      label: "Customer Care",
+      label: t("customerCare"),
       isOpen: showCustomerCare,
       toggle: () => setShowCustomerCare(!showCustomerCare),
-      items: [{ text: "Contact Us", action: () => router.push("https://wa.me/ ") }],
+      items: [{ text:  t("contactUs"), action: () => router.push("tel:+4915256429941") }],
     },
     {
-      label: "Categories",
+      label: t("categories"),
       isOpen: showCategories,
       toggle: () => setShowCategories(!showCategories),
       items: categories.map((cat) => ({
@@ -73,23 +76,33 @@ export default function Footer() {
       ))}
 
       {/* Social Icons */}
-      {/* <View style={styles.socialRow}>
-        <TouchableOpacity onPress={() => Linking.openURL("https://www.instagram.com/diablo.hobbyshop/?hl=en")}>
+      <View style={styles.socialRow}>
+        <TouchableOpacity onPress={() => Linking.openURL("https://www.instagram.com/frischly_?igsh=MWs1dWM0dWUwMTJzbA%3D%3D&utm_source=qr")}>
           <View style={[styles.circle, { backgroundColor: "#E1306C" }]}><FontAwesome name="instagram" size={24} color="white" /></View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL("https://www.facebook.com/p/Diablo-Hobby-Shop-61558014394197/")}>
+        <TouchableOpacity onPress={() => Linking.openURL("https://www.facebook.com/profile.php?id=61579260987923")}>
           <View style={[styles.circle, { backgroundColor: "#1877F2" }]}><FontAwesome name="facebook" size={24} color="white" /></View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL("https://wa.me/96181820902")}>
+        <TouchableOpacity onPress={() => Linking.openURL("tel:+4915256429941")}>
           <View style={[styles.circle, { backgroundColor: "#25D366" }]}><FontAwesome name="whatsapp" size={24} color="white" /></View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL("https://www.tiktok.com/@diablohobbyshop.lb")}>
+        <TouchableOpacity onPress={() => Linking.openURL("https://www.tiktok.com/@frischly.gmbh?_t=ZN-90KSmS2b6Mo&_r=1")}>
           <View style={[styles.circle, { backgroundColor: "black" }]}><FontAwesome5 name="tiktok" size={20} color="white" /></View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL("tel:+96181820902")}>
-          <View style={[styles.circle, { backgroundColor: "red" }]}><Feather name="phone" size={20} color="white" /></View>
+        <TouchableOpacity onPress={() => Linking.openURL("https://youtube.com/@frischlygmbh?si=gVa5iy0EFWTkHBNn")}>
+          <View style={[styles.circle, { backgroundColor: "red" }]}><FontAwesome5 name="youtube" size={20} color="white" /></View>
         </TouchableOpacity>
-      </View> */}
+<TouchableOpacity onPress={() => Linking.openURL("https://www.threads.com/@frischlygmbh?invite=0")}>
+  <View style={[styles.circle, { backgroundColor: "black", justifyContent: 'center', alignItems: 'center' }]}>
+    <Image
+      source={{ uri: 'https://res.cloudinary.com/dziggyzpb/image/upload/v1763481116/threads-social-media-white-logo-icon-hd-png-735811696672474wx9bzdjwmv-removebg-preview_mznwm0.png' }}
+      style={{ width: 20, height: 20 }}
+      resizeMode="contain"
+    />
+  </View>
+</TouchableOpacity>
+ 
+      </View>
 
       {/* Bottom text */}
       <Text style={styles.bottomText}>

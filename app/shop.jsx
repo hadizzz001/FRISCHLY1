@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
@@ -28,9 +29,14 @@ const ITEM_WIDTH = width / 3 - 12; // 3 items per row, adjust margin
 
 
 export default function ShopPage() {
+	const { t } = useTranslation();
+
 	const colorScheme = useColorScheme();
 	const router = useRouter();
 	const searchParams = useLocalSearchParams();
+
+	console.log("Sear ", searchParams);
+	
 
 	// ✅ discount & category from query params
 	const discountParam = searchParams.discount ?? "";
@@ -133,51 +139,55 @@ const decreaseQty = (product) => {
 		getSubcategories();
 	}, []);
 
-	const fetchProducts = async (nextPage = 1, replace = false) => {
-		try {
-			if (nextPage === 1) setLoading(true);
-			else setIsFetchingMore(true);
+const fetchProducts = async (nextPage = 1, replace = false) => {
+	try {
+		if (nextPage === 1) setLoading(true);
+		else setIsFetchingMore(true);
 
-			const params = new URLSearchParams();
-			params.append("page", nextPage);
-			params.append("limit", 12);
+		const params = new URLSearchParams();
+		params.append("page", nextPage);
+		params.append("limit", 12);
 
-			// include filters
-			if (filters.search) params.append("search", filters.search);
-			if (filters.subcategory)
-				params.append("subcategory", filters.subcategory);
-			if (filters.sortBy) {
-				params.append("sortBy", filters.sortBy);
-				params.append("sortOrder", filters.sortOrder);
-			}
-			if (filters.priceRange) params.append("priceRange", filters.priceRange);
-			if (filters.stockLevel) params.append("stockLevel", filters.stockLevel);
+		// include filters (NO MANUAL ENCODING)
+		if (filters.search) params.append("search", filters.search);
+		if (filters.subcategory) params.append("subcategory", filters.subcategory);
 
-			// include category & discount param from query
-			if (categoryParam) params.append("category", categoryParam);
-			let url;
-			if (discountParam === "true") {
-				url = `https://frischlyshop-server.onrender.com/api/products/discount?limit=1000`;
-			} else {
-				url = `https://frischlyshop-server.onrender.com/api/products?${params.toString()}`;
-			}
-
-			console.log("URL:", url);
-
-			const res = await fetch(url);
-			const json = await res.json();
-
-			const newData = Array.isArray(json.data) ? json.data : [];
-
-			setProducts((prev) => (replace ? newData : [...prev, ...newData]));
-			setHasNextPage(json.pagination?.hasNextPage ?? false);
-		} catch (err) {
-			console.error("fetchProducts error:", err);
-		} finally {
-			setLoading(false);
-			setIsFetchingMore(false);
+		if (filters.sortBy) {
+			params.append("sortBy", filters.sortBy);
+			params.append("sortOrder", filters.sortOrder);
 		}
-	};
+
+		if (filters.priceRange) params.append("priceRange", filters.priceRange);
+		if (filters.stockLevel) params.append("stockLevel", filters.stockLevel);
+
+		// include category & discount param from query
+		if (categoryParam) params.append("category", categoryParam);
+
+		let url;
+
+		if (discountParam === "true") {
+			url = `https://frischlyshop-server.onrender.com/api/products/discount?limit=1000`;
+		} else {
+			url = `https://frischlyshop-server.onrender.com/api/products?${params.toString()}`;
+		}
+
+		console.log("URL:", url);
+
+		const res = await fetch(url);
+		const json = await res.json();
+
+		const newData = Array.isArray(json.data) ? json.data : [];
+
+		setProducts((prev) => (replace ? newData : [...prev, ...newData]));
+		setHasNextPage(json.pagination?.hasNextPage ?? false);
+
+	} catch (err) {
+		console.error("fetchProducts error:", err);
+	} finally {
+		setLoading(false);
+		setIsFetchingMore(false);
+	}
+};
 
 	useEffect(() => {
 		setPage(1);
@@ -352,7 +362,7 @@ const renderProduct = ({ item }) => {
 									},
 							]}
 						>
-							All
+							{t("all")}
 						</Text>
 					</TouchableOpacity>
 
@@ -366,8 +376,8 @@ const renderProduct = ({ item }) => {
 									styles.categoryBtn,
 									isSelected && { backgroundColor: "#ffc300" },
 								]}
-								onPress={() => router.push(`/shop?category=${cat.name}`)}
-							>
+								onPress={() => router.push(`/shop?category=${encodeURIComponent(cat.name)}`)}
+							> 
 								<Text
 									style={[
 										styles.categoryText,
@@ -419,11 +429,11 @@ const renderProduct = ({ item }) => {
 					</TouchableOpacity>
 
 					<ScrollView contentContainerStyle={{ padding: 20 }}>
-						<Text style={styles.title}>Filter Products</Text>
+						<Text style={styles.title}>{t("filterProducts")}</Text>
 
 						{/* Search Field */}
 						<TextInput
-							placeholder="Search..."
+							placeholder={t("searchPlaceholder")}
 							value={filters.search}
 							onChangeText={(v) => setFilters((p) => ({ ...p, search: v }))}
 							style={styles.input}
@@ -438,7 +448,7 @@ const renderProduct = ({ item }) => {
 									setFilters((p) => ({ ...p, subcategory: v }))
 								}
 							>
-								<Picker.Item label="All Subcategories" value="" />
+								<Picker.Item label={t("subcategory")} value="" />
 								{subcategories.map((sub) => (
 									<Picker.Item
 										key={sub._id}
@@ -450,7 +460,7 @@ const renderProduct = ({ item }) => {
 						</View>
 
 						{/* Sort Dropdown */}
-						<Text style={{ marginTop: 20, marginBottom: 5 }}>Sort By</Text>
+						<Text style={{ marginTop: 20, marginBottom: 5 }}>{t("sortBy")}</Text>
 						<View style={styles.input}>
 							<Picker
 								selectedValue={`${filters.sortBy}_${filters.sortOrder}`}
@@ -475,7 +485,7 @@ const renderProduct = ({ item }) => {
 							}
 							style={styles.checkboxRow}
 						>
-							<Text style={{ color: "#000" }}>Only Discounted</Text>
+							<Text style={{ color: "#000" }}>{t("onlyDiscounted")}</Text>
 							<View
 								style={[
 									styles.checkbox,
@@ -486,7 +496,7 @@ const renderProduct = ({ item }) => {
 
 						{/* Price Range Picker */}
 						<Text style={{ marginTop: 20, marginBottom: 5 }}>
-							Price Range (€)
+							{t("priceRange")}
 						</Text>
 						<View style={styles.input}>
 							<Picker
@@ -513,7 +523,7 @@ const renderProduct = ({ item }) => {
 								fetchProducts(1, true); // replace products with new filter results
 							}}
 						>
-							<Text style={styles.buttonText}>Apply Filters</Text>
+							<Text style={styles.buttonText}>{t("applyFilter")}</Text>
 						</TouchableOpacity>
 					</ScrollView>
 				</View>

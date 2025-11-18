@@ -11,7 +11,11 @@ import {
 	View,
 } from "react-native";
 
+import { useTranslation } from "@/contexts/TranslationContext";
+
 const Cart = () => {
+	const { t } = useTranslation();
+
 	const { cart, removeFromCart, subtotal, addToCart, calculatePriceDetails } =
 		useCart();
 
@@ -26,7 +30,7 @@ const Cart = () => {
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.heading}>Your Shopping Bag</Text>
+			<Text style={styles.heading}>{t("yourShoppingBag")}</Text>
 
 			<ScrollView style={styles.cartList}>
 				{cart && cart.length > 0 ? (
@@ -61,16 +65,16 @@ const Cart = () => {
 					})
 				) : (
 					<Text style={styles.emptyText}>
-						You have no items in your shopping bag.
+						{t("noItemsInBag")}
 					</Text>
 				)}
 			</ScrollView>
 
 			<View style={styles.footer}>
-				<Text style={styles.total}>Total: €{subtotal.toFixed(2)} </Text>
+				<Text style={styles.total}>{t("total")}: €{subtotal.toFixed(2)} </Text>
 
 				<TouchableOpacity style={styles.checkoutBtn} onPress={goToCart}>
-					<Text style={styles.checkoutText}>Go to Checkout</Text>
+					<Text style={styles.checkoutText}>{t("goToCheckout")}</Text>
 				</TouchableOpacity>
 			</View>
 		</View>

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/contexts/TranslationContext";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
@@ -5,9 +6,190 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+const countryMap = {
+  Afghanistan: "AF",
+  Albania: "AL",
+  Algeria: "DZ",
+  Andorra: "AD",
+  Angola: "AO",
+  Argentina: "AR",
+  Armenia: "AM",
+  Australia: "AU",
+  Austria: "AT",
+  Azerbaijan: "AZ",
+  Bahamas: "BS",
+  Bahrain: "BH",
+  Bangladesh: "BD",
+  Barbados: "BB",
+  Belarus: "BY",
+  Belgium: "BE",
+  Belize: "BZ",
+  Benin: "BJ",
+  Bhutan: "BT",
+  Bolivia: "BO",
+  BosniaAndHerzegovina: "BA",
+  Botswana: "BW",
+  Brazil: "BR",
+  Brunei: "BN",
+  Bulgaria: "BG",
+  BurkinaFaso: "BF",
+  Burundi: "BI",
+  Cambodia: "KH",
+  Cameroon: "CM",
+  Canada: "CA",
+  CapeVerde: "CV",
+  CentralAfricanRepublic: "CF",
+  Chad: "TD",
+  Chile: "CL",
+  China: "CN",
+  Colombia: "CO",
+  Comoros: "KM",
+  Congo: "CG",
+  CongoDR: "CD",
+  CostaRica: "CR",
+  Croatia: "HR",
+  Cuba: "CU",
+  Cyprus: "CY",
+  CzechRepublic: "CZ",
+  Denmark: "DK",
+  Djibouti: "DJ",
+  Dominica: "DM",
+  DominicanRepublic: "DO",
+  Ecuador: "EC",
+  Egypt: "EG",
+  ElSalvador: "SV",
+  Estonia: "EE",
+  Eswatini: "SZ",
+  Ethiopia: "ET",
+  Fiji: "FJ",
+  Finland: "FI",
+  France: "FR",
+  Gabon: "GA",
+  Gambia: "GM",
+  Georgia: "GE",
+  Germany: "DE",
+  Ghana: "GH",
+  Greece: "GR",
+  Grenada: "GD",
+  Guatemala: "GT",
+  Guinea: "GN",
+  GuineaBissau: "GW",
+  Guyana: "GY",
+  Haiti: "HT",
+  Honduras: "HN",
+  Hungary: "HU",
+  Iceland: "IS",
+  India: "IN",
+  Indonesia: "ID",
+  Iran: "IR",
+  Iraq: "IQ",
+  Ireland: "IE",
+  Israel: "IL",
+  Italy: "IT",
+  IvoryCoast: "CI",
+  Jamaica: "JM",
+  Japan: "JP",
+  Jordan: "JO",
+  Kazakhstan: "KZ",
+  Kenya: "KE",
+  Kuwait: "KW",
+  Kyrgyzstan: "KG",
+  Laos: "LA",
+  Latvia: "LV",
+  Lebanon: "LB",
+  Lesotho: "LS",
+  Liberia: "LR",
+  Libya: "LY",
+  Liechtenstein: "LI",
+  Lithuania: "LT",
+  Luxembourg: "LU",
+  Madagascar: "MG",
+  Malawi: "MW",
+  Malaysia: "MY",
+  Maldives: "MV",
+  Mali: "ML",
+  Malta: "MT",
+  Mauritania: "MR",
+  Mauritius: "MU",
+  Mexico: "MX",
+  Moldova: "MD",
+  Monaco: "MC",
+  Mongolia: "MN",
+  Montenegro: "ME",
+  Morocco: "MA",
+  Mozambique: "MZ",
+  Myanmar: "MM",
+  Namibia: "NA",
+  Nepal: "NP",
+  Netherlands: "NL",
+  NewZealand: "NZ",
+  Nicaragua: "NI",
+  Niger: "NE",
+  Nigeria: "NG",
+  NorthKorea: "KP",
+  NorthMacedonia: "MK",
+  Norway: "NO",
+  Oman: "OM",
+  Pakistan: "PK",
+  Palestine: "PS",
+  Panama: "PA",
+  PapuaNewGuinea: "PG",
+  Paraguay: "PY",
+  Peru: "PE",
+  Philippines: "PH",
+  Poland: "PL",
+  Portugal: "PT",
+  Qatar: "QA",
+  Romania: "RO",
+  Russia: "RU",
+  Rwanda: "RW",
+  SaudiArabia: "SA",
+  Senegal: "SN",
+  Serbia: "RS",
+  Seychelles: "SC",
+  SierraLeone: "SL",
+  Singapore: "SG",
+  Slovakia: "SK",
+  Slovenia: "SI",
+  Somalia: "SO",
+  SouthAfrica: "ZA",
+  SouthKorea: "KR",
+  SouthSudan: "SS",
+  Spain: "ES",
+  SriLanka: "LK",
+  Sudan: "SD",
+  Suriname: "SR",
+  Sweden: "SE",
+  Switzerland: "CH",
+  Syria: "SY",
+  Taiwan: "TW",
+  Tajikistan: "TJ",
+  Tanzania: "TZ",
+  Thailand: "TH",
+  Togo: "TG",
+  TrinidadAndTobago: "TT",
+  Tunisia: "TN",
+  Turkey: "TR",
+  Turkmenistan: "TM",
+  Uganda: "UG",
+  Ukraine: "UA",
+  UnitedArabEmirates: "AE",
+  UnitedKingdom: "GB",
+  UnitedStates: "US",
+  Uruguay: "UY",
+  Uzbekistan: "UZ",
+  Venezuela: "VE",
+  Vietnam: "VN",
+  Yemen: "YE",
+  Zambia: "ZM",
+  Zimbabwe: "ZW"
+};
+
+
 export default function EditProfile() {
   const [user, setUser] = useState(null);
   const router = useRouter();
+	const { t } = useTranslation();
 
   const [zones, setZones] = useState([]); // <-- ZIP zones
 
@@ -51,15 +233,21 @@ export default function EditProfile() {
             const data = await res.json();
             setUser(data.data.user);
 
-            setForm({
-              name: data.data.user.name || "",
-              phoneNumber: data.data.user.phoneNumber || "",
-              street: data.data.user.address?.street || "",
-              city: data.data.user.address?.city || "",
-              state: data.data.user.address?.state || "",
-              zipCode: data.data.user.address?.zipCode || "",
-              country: data.data.user.address?.country || "",
-            });
+ 
+
+const countryName = data.data.user.address?.country || "";
+const shortCode = countryMap[countryName.replace(/\s/g, "")] || countryName.slice(0, 2).toUpperCase();
+
+setForm({
+  name: data.data.user.name || "",
+  phoneNumber: data.data.user.phoneNumber || "",
+  street: data.data.user.address?.street || "",
+  city: data.data.user.address?.city || "",
+  state: data.data.user.address?.state || "",
+  zipCode: data.data.user.address?.zipCode || "",
+  country: shortCode,
+});
+
           } else {
             console.error("❌ Failed to fetch user:", res.status);
           }
@@ -136,7 +324,7 @@ export default function EditProfile() {
 
       {["name", "phoneNumber"].map((key) => (
         <View key={key} style={{ marginBottom: 12 }}>
-          <Text style={styles.label}>{key === "phoneNumber" ? "Phone Number" : "Name"}</Text>
+          <Text style={styles.label}>{key === "phoneNumber" ? t("phoneNumber") : t("fullName")}</Text>
           <TextInput
             style={styles.input}
             value={form[key]}
@@ -145,31 +333,28 @@ export default function EditProfile() {
         </View>
       ))}
 
-      {["street", "city", "state"].map((key) => (
-        <View key={key} style={{ marginBottom: 12 }}>
-          <Text style={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
-          <TextInput
-            style={styles.input}
-            value={form[key]}
-            onChangeText={(val) => setForm({ ...form, [key]: val })}
-          />
-        </View>
-      ))}
+{["street", "city", "state"].map((key) => (
+  <View key={key} style={{ marginBottom: 12 }}>
+    <Text style={styles.label}>{t(key)}</Text>
+    <TextInput
+      style={styles.input}
+      value={form[key]}
+      onChangeText={(val) => setForm({ ...form, [key]: val })}
+    />
+  </View>
+))}
+
 
       {/* ZIP Code Dropdown */}
       <View
         style={{
           marginBottom: 12,
           width: "100%",
-          minHeight: 55,
-          borderWidth: 1,
-          borderColor: "#000000",
-          borderRadius: 12,
-          backgroundColor: "#FFFFFF",
+          minHeight: 55, 
           justifyContent: "center",
         }}
       >
-        <Text style={[styles.label, { marginLeft: 10 }]}>ZIP Code</Text>
+        <Text style={[styles.label, { marginLeft: 10 }]}>{t("selectZipCode")}</Text>
         <Picker
           selectedValue={form.zipCode}
           onValueChange={(itemValue) => setForm({ ...form, zipCode: itemValue })}
@@ -185,16 +370,29 @@ export default function EditProfile() {
           ))}
         </Picker>
       </View>
+ 
+{/* Country Dropdown */}
+<View
+  style={{
+    marginBottom: 12,
+    width: "100%",
+    minHeight: 55,
+    justifyContent: "center",
+  }}
+>
+  <Text style={[styles.label, { marginLeft: 10 }]}>{t("country")}</Text>
+  <Picker
+    selectedValue={form.country}
+    onValueChange={(itemValue) => setForm({ ...form, country: itemValue })}
+    style={{ color: "#000" }}
+  >
+    <Picker.Item label="Select Country" value="" />
+    {Object.entries(countryMap).map(([name, code]) => (
+      <Picker.Item key={code} label={name} value={code} />
+    ))}
+  </Picker>
+</View>
 
-      {/* Country - Read Only */}
-      <View style={{ marginBottom: 12 }}>
-        <Text style={styles.label}>Country</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: "#f4f4f4" }]}
-          value={form.country}
-          editable={false}
-        />
-      </View>
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleUpdate}>
         <Text style={styles.saveText}>Save Changes</Text>

@@ -1,24 +1,26 @@
 "use client";
 
+import { useTranslation } from "@/contexts/TranslationContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    KeyboardAvoidingView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // Simple visible password input
 function VisiblePasswordInput({ value, onChangeText, placeholder }) {
+
   return (
     <View style={styles.inputContainer}>
       <TextInput
@@ -34,6 +36,8 @@ function VisiblePasswordInput({ value, onChangeText, placeholder }) {
 }
 
 export default function ChangePassword() {
+	const { t } = useTranslation();
+
   const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -101,7 +105,7 @@ export default function ChangePassword() {
           }}
         >
           <Text style={{ fontSize: 28, fontWeight: "bold", color: "#000" }}>
-            Change Password
+            {t("changePassword")}
           </Text>
         </View>
 
@@ -109,17 +113,17 @@ export default function ChangePassword() {
           <VisiblePasswordInput
             value={currentPassword}
             onChangeText={setCurrentPassword}
-            placeholder="Current Password"
+            placeholder={t("currentPassword")}
           />
           <VisiblePasswordInput
             value={newPassword}
             onChangeText={setNewPassword}
-            placeholder="New Password"
+            placeholder={t("newPassword")}
           />
           <VisiblePasswordInput
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            placeholder="Confirm New Password"
+            placeholder={t("confirmNewPassword")}
           />
 
           <TouchableOpacity
@@ -138,7 +142,7 @@ export default function ChangePassword() {
               <ActivityIndicator size="small" color="#000" />
             ) : (
               <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
-                Update Password
+                {t("updatePassword")}
               </Text>
             )}
           </TouchableOpacity>

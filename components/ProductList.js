@@ -17,6 +17,7 @@ import Feather from "react-native-vector-icons/Feather";
 
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 const { width } = Dimensions.get("window");
@@ -24,6 +25,8 @@ const ITEM_WIDTH = width / 3 - 15;
 const LIMIT = 10; // items per fetch
 
 export default function ShopPage({ refreshTrigger, setRefreshing }) {
+	const { t } = useTranslation();
+
 	const colorScheme = useColorScheme();
 	const router = useRouter();
 	const [products, setProducts] = useState([]);
@@ -253,7 +256,7 @@ const decreaseQty = (product) => {
 								style={styles.loadMoreBtn}
 								onPress={handleLoadMore}
 							>
-								<Text style={styles.loadMoreText}>Load More</Text>
+								<Text style={styles.loadMoreText}>{t("loadMore")}</Text>
 							</TouchableOpacity>
 						)}
 					</>

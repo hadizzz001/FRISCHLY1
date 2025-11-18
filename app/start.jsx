@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/contexts/TranslationContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -21,6 +22,8 @@ import {
 } from "react-native";
 
 export default function Start() {
+	const { t } = useTranslation();
+
 	const router = useRouter();
 	const colorScheme = useColorScheme();
 	const [email, setEmail] = useState("");
@@ -133,7 +136,7 @@ export default function Start() {
 						}}
 					>
 						<TextInput
-							placeholder="Email"
+							placeholder={t("email")}
 							keyboardType="email-address"
 							value={email}
 							onChangeText={setEmail}
@@ -161,7 +164,7 @@ export default function Start() {
 						}}
 					>
 						<TextInput
-							placeholder="Password"
+							placeholder={t("password")}
 							secureTextEntry={!showPassword}
 							value={password}
 							onChangeText={setPassword}
@@ -203,26 +206,45 @@ export default function Start() {
 							<Text
 								style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18 }}
 							>
-								Login
+								{t("login")}
 							</Text>
 						)}
 					</TouchableOpacity>
 
 					<TouchableOpacity onPress={() => router.push("/register")}>
 						<Text style={{ color: "#000", fontSize: 16 }}>
-							Don't have an account? Register
+							{t("noAccount")}{" "}
+							<Text style={{ color: "#ffc300" }}>{t("register")}</Text>
 						</Text>
 					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={async () => { 
+							router.push("https://frischlyshop-server.onrender.com/forgot-password.html");
+						}}
+					>
+						<Text style={{ fontSize: 16, textAlign: "center" }}>
+							<Text style={{ color: "#000" }}> 
+								<Text style={{ color: "#ffc300" }}>{t("forget")}</Text>
+							</Text>
+						</Text>
+
+
+					</TouchableOpacity>
+
+
 					<TouchableOpacity
 						onPress={async () => {
 							await AsyncStorage.setItem("guest", "true"); // 👈 mark as guest
 							router.replace("/(tabs)");
 						}}
 					>
-						<Text style={{ fontSize: 16 }}>
-							<Text style={{ color: "#000" }}>Continue </Text>
-							<Text style={{ color: "#ffc300" }}>as guest</Text>
+						<Text style={{ fontSize: 16, textAlign: "center" }}>
+							<Text style={{ color: "#000" }}>
+								{t("continue")}{" "}
+								<Text style={{ color: "#ffc300" }}>{t("asGuest")}</Text>
+							</Text>
 						</Text>
+
 
 					</TouchableOpacity>
 				</View>

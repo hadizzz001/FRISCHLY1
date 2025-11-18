@@ -3,6 +3,7 @@ import OutOfStockComponent from "@/components/OutOfStockComponent";
 import QuantitySelector from "@/components/QuantitySelector";
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -19,6 +20,8 @@ import Feather from "react-native-vector-icons/Feather";
 const { width } = Dimensions.get("window");
 
 const ProductPage = () => {
+	const { t } = useTranslation();
+
 	const route = useRoute();
 	const navigation = useNavigation();
 	const { id: search } = route.params || {};
@@ -210,25 +213,25 @@ const ProductPage = () => {
 						return (
 							<View style={styles.priceDetails}>
 								<Text style={styles.basePrice}>
-									Base Price: €{basePrice.toFixed(2)}
+									{t("baseP")}: €{basePrice.toFixed(2)}
 								</Text>
 								{discountPercent > 0 && (
 									<Text style={styles.discount}>
-										Discount ({discountPercent}%): -€{discountAmount.toFixed(2)}
+										{t("discount")} ({discountPercent}%): -€{discountAmount.toFixed(2)}
 									</Text>
 								)}
 								{taxPercent > 0 && (
 									<Text style={styles.tax}>
-										Tax ({taxPercent}%): +€{taxAmount.toFixed(2)}
+										{t("tax")} ({taxPercent}%): +€{taxAmount.toFixed(2)}
 									</Text>
 								)}
 								{bottleRefundValue > 0 && (
 									<Text style={styles.bottleRefund}>
-										Bottle Refund: +€{bottleRefundValue.toFixed(2)}
+										{t("bottle")}: +€{bottleRefundValue.toFixed(2)}
 									</Text>
 								)}
 								<Text style={styles.finalPrice}>
-									Final Price: €{finalPrice.toFixed(2)}
+									{t("fPrice")}: €{finalPrice.toFixed(2)}
 								</Text>
 							</View>
 						);
@@ -240,7 +243,7 @@ const ProductPage = () => {
 							onPress={() => navigation.navigate("checkout")}
 							style={styles.button}
 						>
-							<Text style={styles.buttonText}>CHECKOUT NOW</Text>
+							<Text style={styles.buttonText}>{t("goToCheckout")}</Text>
 						</TouchableOpacity>
 					) : (
 						<>
@@ -251,7 +254,7 @@ const ProductPage = () => {
 							/>
 							{!isOutOfStock ? (
 								<TouchableOpacity onPress={handleAddToCart} style={styles.button}>
-									<Text style={styles.buttonText}>ADD TO BAG</Text>
+									<Text style={styles.buttonText}>{t("aBag")}</Text>
 								</TouchableOpacity>
 							) : (
 								<OutOfStockComponent itemName={name} />
@@ -401,7 +404,7 @@ const ProductPage = () => {
   <View style={styles.modalBackground}>
     <View style={styles.modalContainer}>
       <Text style={{ marginBottom: 20 }}>
-        Are your age 18+?
+        Are your age 18+? (Driver will check the ID)
       </Text>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <TouchableOpacity

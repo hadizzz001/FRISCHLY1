@@ -1,3 +1,4 @@
+import { useTranslation } from "@/contexts/TranslationContext";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -10,6 +11,7 @@ import {
 } from "react-native";
 
 export default function AccScreen() {
+	const { t } = useTranslation();
 	const [user, setUser] = useState<any>(null);
 	const router = useRouter(); 
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -90,7 +92,15 @@ export default function AccScreen() {
 	}, [router]);
 
 	return (
-		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+<ScrollView
+  style={styles.container}
+  showsVerticalScrollIndicator={true}
+  contentContainerStyle={{
+    paddingBottom: 160,
+    flexGrow: 1,
+  }}
+>
+
 			{/* Header Section */}
 			<View style={styles.header}>
 				<View style={styles.avatarContainer}>
@@ -98,16 +108,16 @@ export default function AccScreen() {
 						<Feather name="user" size={40} color="#FFC300" />
 					</View>
 				</View>
-				<Text style={styles.title}>My Profile</Text>
+				<Text style={styles.title}>{t("myProfile")}</Text>
 				<Text style={styles.subtitle}>
-					{user ? "Manage your account" : "Welcome, Guest"}
+					{user ? t("manageAccount") : t("welcome")}
 				</Text>
 			</View>
 
 			{/* User Info Card */}
 			{user ? (
 				<View style={styles.infoCard}>
-					<Text style={styles.cardTitle}>Account Information</Text>
+					<Text style={styles.cardTitle}>{t("accountInfo")}</Text>
 
 					{/* Basic Information Section */}
 					<View style={styles.infoRow}>
@@ -115,7 +125,7 @@ export default function AccScreen() {
 							<Feather name="user" size={20} color="#FFC300" />
 						</View>
 						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>Name</Text>
+							<Text style={styles.infoLabel}>{t("name")}</Text>
 							<Text style={styles.infoValue}>{user.name}</Text>
 						</View>
 					</View>
@@ -125,7 +135,7 @@ export default function AccScreen() {
 							<Feather name="mail" size={20} color="#FFC300" />
 						</View>
 						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>Email</Text>
+							<Text style={styles.infoLabel}>{t("fullName")}</Text>
 							<Text style={styles.infoValue}>{user.email}</Text>
 						</View>
 					</View>
@@ -135,21 +145,21 @@ export default function AccScreen() {
 							<Feather name="phone" size={20} color="#FFC300" />
 						</View>
 						<View style={styles.infoContent}>
-							<Text style={styles.infoLabel}>Phone</Text>
+							<Text style={styles.infoLabel}>{t("phoneNumber")}</Text>
 							<Text style={styles.infoValue}>{user.phoneNumber}</Text>
 						</View>
 					</View>
 
 					{/* Address Section */}
 					<View style={styles.addressSection}>
-						<Text style={styles.sectionTitle}>Address</Text>
+						<Text style={styles.sectionTitle}>{t("address")}</Text>
 
 						<View style={styles.infoRow}>
 							<View style={styles.iconContainer}>
 								<Feather name="map-pin" size={20} color="#FFC300" />
 							</View>
 							<View style={styles.infoContent}>
-								<Text style={styles.infoLabel}>Street</Text>
+								<Text style={styles.infoLabel}>{t("street")}</Text>
 								<Text style={styles.infoValue}>
 									{user.address?.street || "Not provided"}
 								</Text>
@@ -161,7 +171,7 @@ export default function AccScreen() {
 								<Feather name="map" size={20} color="#FFC300" />
 							</View>
 							<View style={styles.infoContent}>
-								<Text style={styles.infoLabel}>City</Text>
+								<Text style={styles.infoLabel}>{t("city")}</Text>
 								<Text style={styles.infoValue}>
 									{user.address?.city || "Not provided"}
 								</Text>
@@ -173,7 +183,7 @@ export default function AccScreen() {
 								<Feather name="navigation" size={20} color="#FFC300" />
 							</View>
 							<View style={styles.infoContent}>
-								<Text style={styles.infoLabel}>State</Text>
+								<Text style={styles.infoLabel}>{t("state")}</Text>
 								<Text style={styles.infoValue}>
 									{user.address?.state || "Not provided"}
 								</Text>
@@ -185,7 +195,7 @@ export default function AccScreen() {
 								<Feather name="hash" size={20} color="#FFC300" />
 							</View>
 							<View style={styles.infoContent}>
-								<Text style={styles.infoLabel}>Zip Code</Text>
+								<Text style={styles.infoLabel}>{t("selectZipCode")}</Text>
 								<Text style={styles.infoValue}>
 									{user.address?.zipCode || "Not provided"}
 								</Text>
@@ -197,7 +207,7 @@ export default function AccScreen() {
 								<Feather name="globe" size={20} color="#FFC300" />
 							</View>
 							<View style={styles.infoContent}>
-								<Text style={styles.infoLabel}>Country</Text>
+								<Text style={styles.infoLabel}>{t("country")}</Text>
 								<Text style={styles.infoValue}>
 									{user.address?.country || "Not provided"}
 								</Text>
@@ -208,9 +218,9 @@ export default function AccScreen() {
 			) : (
 				<View style={styles.guestCard}>
 					<Feather name="user-x" size={48} color="#FFC300" />
-					<Text style={styles.guestText}>You're browsing as a guest</Text>
+					<Text style={styles.guestText}>{t("browsingAsGuest")}</Text>
 					<Text style={styles.guestSubtext}>
-						Sign in to access your account
+						{t("signInToAccess")}
 					</Text>
 				</View>
 			)}
@@ -227,7 +237,7 @@ export default function AccScreen() {
 				onPress={() => router.push("/edit-profile")}
 			>
 				<Feather name="edit" size={20} color="#000" style={styles.buttonIcon} />
-				<Text style={styles.actionButtonText}>Edit Profile</Text>
+				<Text style={styles.actionButtonText}>{t("editProfile")}</Text>
 			</TouchableOpacity>
 
 			<TouchableOpacity
@@ -235,7 +245,7 @@ export default function AccScreen() {
 				onPress={() => router.push("/changepass")}
 			>
 				<Feather name="lock" size={20} color="#000" style={styles.buttonIcon} />
-				<Text style={styles.actionButtonText}>Change Password</Text>
+				<Text style={styles.actionButtonText}>{t("changePassword")}</Text>
 			</TouchableOpacity>
 		</View>
 	</>
@@ -249,7 +259,7 @@ export default function AccScreen() {
 		onPress={() => router.push("/order")}
 	>
 		<Feather name="eye" size={20} color="#000" style={styles.buttonIcon} />
-		<Text style={styles.actionButtonText}>View Orders</Text>
+		<Text style={styles.actionButtonText}>{t("viewOrders")}</Text>
 	</TouchableOpacity>
  
 
@@ -273,7 +283,7 @@ export default function AccScreen() {
 			style={styles.buttonIcon}
 		/>
 		<Text style={[styles.actionButtonText, styles.logoutText]}>
-			{user ? "Logout" : "Login"}
+			{user ? t("logout") : t("loginHere")}
 		</Text>
 	</TouchableOpacity>
 
@@ -285,7 +295,7 @@ export default function AccScreen() {
         >
           <Feather name="trash-2" size={20} color="#fff" style={styles.buttonIcon} />
           <Text style={[styles.actionButtonText, styles.deleteText]}>
-            Delete Account
+            {t("deleteAccount")}
           </Text>
         </TouchableOpacity>
       )}
@@ -306,7 +316,7 @@ export default function AccScreen() {
             width: "80%", alignItems: "center"
           }}>
             <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-              Confirm Password
+              {t("confirmNewPassword")}
             </Text>
             <TextInput
               placeholder="Enter your password"
@@ -323,14 +333,14 @@ export default function AccScreen() {
                 style={[styles.actionButton, { flex: 1, backgroundColor: "#ccc", marginRight: 5 }]}
                 onPress={() => setShowDeleteModal(false)}
               >
-                <Text style={{ color: "#000", fontWeight: "bold" }}>Cancel</Text>
+                <Text style={{ color: "#000", fontWeight: "bold" }}>{t("cancel")}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.actionButton, { flex: 1, backgroundColor: "#FF4444", marginLeft: 5 }]}
                 onPress={handleDeleteAccount}
               >
-                <Text style={{ color: "#fff", fontWeight: "bold" }}>Delete</Text>
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>{t("deleteAccount")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -347,12 +357,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "#FFFFFF",
 	},
-	header: {
-		alignItems: "center",
-		paddingVertical: 40,
-		paddingHorizontal: 20,
-		backgroundColor: "#FFFFFF",
-	},
+header: {
+  alignItems: "center",
+  paddingVertical: 20,   // reduced from 40
+  paddingHorizontal: 20,
+},
 	avatarContainer: {
 		marginBottom: 16,
 	},
@@ -483,10 +492,10 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 		letterSpacing: 1,
 	},
-	actionsContainer: {
-		paddingHorizontal: 20,
-		paddingBottom: 40,
-	},
+actionsContainer: {
+  paddingHorizontal: 20,
+  paddingBottom: 200,   // extra space for safe scroll
+},
 	actionButton: {
 		flexDirection: "row",
 		alignItems: "center",

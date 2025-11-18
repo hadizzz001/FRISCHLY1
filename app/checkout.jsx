@@ -1,4 +1,5 @@
 import { useCart } from "@/contexts/CartContext";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
@@ -18,6 +19,8 @@ import {
 import OrderComponent from "../components/CreateOrderButton";
 
 const CheckoutScreen = () => {
+	const { t } = useTranslation();
+
 	const { cart, removeFromCart,  subtotal, calculatePriceDetails } =
 		useCart(); 
 	const [deliveryFee, setDeliveryFee] = useState(0);
@@ -311,7 +314,7 @@ const CheckoutScreen = () => {
 					{zones.map((zone) => (
 						<Picker.Item
 							key={zone._id}
-							label={`${zone.zipCode} — ${zone.zoneName}`} // display both
+							label={`${zone.zipCode} `} // display both
 							value={zone.zipCode} // only store zipCode
 						/>
 					))}
@@ -344,7 +347,7 @@ const CheckoutScreen = () => {
 				onChangeText={(v) => handleInput("street", v)}
 			/>
 
-			<Text style={styles.heading}>Order Summary</Text>
+			<Text style={styles.heading}>{t("orderSummary")}</Text>
 
 			<View>
 {cart.map((item, index) => {
@@ -372,15 +375,15 @@ const CheckoutScreen = () => {
 			</View>
 
 			<View style={styles.summaryRow}>
-				<Text>Subtotal</Text>
+				<Text>{t("subtotal")}</Text>
 				<Text>€{subtotal.toFixed(2)}</Text>
 			</View>
 			<View style={styles.summaryRow}>
-				<Text>Delivery</Text>
+				<Text>{t("delivery")}</Text>
 				<Text>€{deliveryFee.toFixed(2)}</Text>
 			</View>
 			<View style={styles.summaryRow}>
-				<Text style={{ fontWeight: "bold" }}>Total</Text>
+				<Text style={{ fontWeight: "bold" }}>{t("total")}</Text>
 				<Text style={{ fontWeight: "bold" }}>€{total}</Text>
 			</View>
 

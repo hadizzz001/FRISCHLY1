@@ -2,6 +2,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
+import { useTranslation } from "@/contexts/TranslationContext";
 import {
 	ActivityIndicator,
 	Dimensions,
@@ -19,6 +20,7 @@ const ITEM_WIDTH = width / 3 - 12; // Show exactly 3 per row
 const ITEM_HEIGHT = 180;
 
 export default function DiscountCarousel({ refreshTrigger }) {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const [discountedProducts, setDiscountedProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -96,7 +98,7 @@ const increaseQty = (product) => {
 				}}
 			>
 				<ActivityIndicator size="large" color="#ffc300" />
-				<Text>Loading discounted products...</Text>
+				<Text>Loading  ...</Text>
 			</View>
 		);
 	}
@@ -190,13 +192,13 @@ const finalPrice = basePrice;
 	return (
 		<View style={{ height: ITEM_HEIGHT + 80, backgroundColor: "#FFFFFF" }}>
 			<View style={styles.header}>
-				<Text style={styles.headerText}>Hot Sales</Text>
+				<Text style={styles.headerText}>{t("hotSale")}</Text>
 				<View style={styles.headerRight}>
 					<TouchableOpacity
 						style={styles.allButton}
 						onPress={() => router.push("/shop?discount=true")}
 					>
-						<Text style={styles.allText}>All</Text>
+						<Text style={styles.allText}>{t("all")}</Text>
 					</TouchableOpacity>
 					<TouchableOpacity onPress={() => router.push("/shop?discount=true")}>
 						<Feather name="chevron-right" size={24} color="#000000" />

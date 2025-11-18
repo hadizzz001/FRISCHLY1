@@ -1,4 +1,5 @@
 import { useCart } from "@/contexts/CartContext";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
@@ -14,6 +15,8 @@ import {
 import Svg, { G, Path } from "react-native-svg";
 
 export default function CheckoutSuccessPage() {
+	const { t } = useTranslation();
+
   const { clearCart } = useCart();
   const router = useRouter();
   const [orders, setOrders] = useState([]);
@@ -98,9 +101,9 @@ export default function CheckoutSuccessPage() {
         </Svg>
 
         {/* Messages */}
-        <Text style={styles.title}>Thank you for your purchase!</Text>
+        <Text style={styles.title}>{t("thankYouPurchase")}</Text>
         <Text style={styles.subtitle}>
-          Your order has been successfully processed.
+          {t("orderProcessed")}
         </Text>
 
         {paymentUrl && (
@@ -108,7 +111,7 @@ export default function CheckoutSuccessPage() {
             style={styles.button}
             onPress={() => Linking.openURL(`https://onelink.pay1.de/p/${paymentUrl}`)}
           >
-            <Text style={styles.buttonText}>Proceed to Payment</Text>
+            <Text style={styles.buttonText}>{t("proceedToPayment")}</Text>
           </TouchableOpacity>
         )}
       </View>

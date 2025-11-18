@@ -3,9 +3,10 @@
 import Header from "@/components/Header";
 import { BooleanProvider } from "@/contexts/CartBoolContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { TranslationProvider } from "@/contexts/TranslationContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useFonts } from "expo-font";
-import { Stack, usePathname } from "expo-router"; // <-- usePathname
+import { Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -44,6 +45,7 @@ export default function RootLayout() {
 	const showHeader = !hideHeaderOn.includes(pathname);
 
 	return (
+		<TranslationProvider>
 		<CartProvider>
 			<BooleanProvider>
 				<View style={styles.container}>
@@ -79,6 +81,7 @@ export default function RootLayout() {
 				</View>
 			</BooleanProvider>
 		</CartProvider>
+		</TranslationProvider>
 	);
 }
 

@@ -178,7 +178,7 @@ const handleCancel = async () => {
         />
         <Text style={styles.itemText}>{item.product.name}</Text>
         <Text style={styles.itemText}>Qty: {item.quantity}</Text>
-        <Text style={styles.itemText}>Price: ${item.totalPrice.toFixed(2)}</Text>
+        <Text style={styles.itemText}>Price: €{item.totalPrice.toFixed(2)}</Text>
       </View>
     );
   };
@@ -253,9 +253,9 @@ const renderItem = ({ item }) => (
       </View>
 
       <View style={{ flex: 2 }}>
-        <Text>Subtotal: ${item.subtotal.toFixed(2)}</Text>
-        <Text>Delivery: ${item.delivery?.toFixed(2) || "0.00"}</Text>
-        <Text style={{ fontWeight: 'bold' }}>Total: ${(item.total).toFixed(2)}</Text>
+        <Text>Subtotal: €{item.subtotal.toFixed(2)}</Text>
+        <Text>Delivery: €{item.delivery?.toFixed(2) || "0.00"}</Text>
+        <Text style={{ fontWeight: 'bold' }}>Total: €{(item.total).toFixed(2)}</Text>
       </View>
 
       <Feather

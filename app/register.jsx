@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/contexts/TranslationContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
@@ -7,22 +8,116 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+	Alert,
+	Dimensions,
+	Image,
+	KeyboardAvoidingView,
+	Platform,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	useColorScheme,
+	View
 } from "react-native";
 
-// -------------------------
-// InputBox moved outside component to prevent focus loss
-// -------------------------
+// Add this at the top with your countryMap
+const countryMap = {
+	Afghanistan: "AF",
+	Albania: "AL",
+	Algeria: "DZ",
+	Andorra: "AD",
+	Angola: "AO",
+	Argentina: "AR",
+	Armenia: "AM",
+	Australia: "AU",
+	Austria: "AT",
+	Azerbaijan: "AZ",
+	Bahamas: "BS",
+	Bahrain: "BH",
+	Bangladesh: "BD",
+	Barbados: "BB",
+	Belarus: "BY",
+	Belgium: "BE",
+	Belize: "BZ",
+	Benin: "BJ",
+	Bhutan: "BT",
+	Bolivia: "BO",
+	BosniaAndHerzegovina: "BA",
+	Botswana: "BW",
+	Brazil: "BR",
+	Brunei: "BN",
+	Bulgaria: "BG",
+	BurkinaFaso: "BF",
+	Burundi: "BI",
+	Cambodia: "KH",
+	Cameroon: "CM",
+	Canada: "CA",
+	CapeVerde: "CV",
+	CentralAfricanRepublic: "CF",
+	Chad: "TD",
+	Chile: "CL",
+	China: "CN",
+	Colombia: "CO",
+	Comoros: "KM",
+	Congo: "CG",
+	CongoDR: "CD",
+	CostaRica: "CR",
+	Croatia: "HR",
+	Cuba: "CU",
+	Cyprus: "CY",
+	CzechRepublic: "CZ",
+	Denmark: "DK",
+	Djibouti: "DJ",
+	Dominica: "DM",
+	DominicanRepublic: "DO",
+	Ecuador: "EC",
+	Egypt: "EG",
+	ElSalvador: "SV",
+	Estonia: "EE",
+	Eswatini: "SZ",
+	Ethiopia: "ET",
+	Fiji: "FJ",
+	Finland: "FI",
+	France: "FR",
+	Gabon: "GA",
+	Gambia: "GM",
+	Georgia: "GE",
+	Germany: "DE",
+	Ghana: "GH",
+	Greece: "GR",
+	Grenada: "GD",
+	Guatemala: "GT",
+	Guinea: "GN",
+	GuineaBissau: "GW",
+	Guyana: "GY",
+	Haiti: "HT",
+	Honduras: "HN",
+	Hungary: "HU",
+	Iceland: "IS",
+	India: "IN",
+	Indonesia: "ID",
+	Iran: "IR",
+	Iraq: "IQ",
+	Ireland: "IE",
+	Israel: "IL",
+	Italy: "IT",
+	IvoryCoast: "CI",
+	Jamaica: "JM",
+	Japan: "JP",
+	Jordan: "JO",
+	Kazakhstan: "KZ",
+	Kenya: "KE",
+	Kuwait: "KW",
+	Kyrgyzstan: "KG",
+	Laos: "LA",
+	Latvia: "LV",
+	Lebanon: "LB",
+};
+
+
+
 const InputBox = ({
 	placeholder,
 	value,
@@ -58,11 +153,13 @@ const InputBox = ({
 );
 
 export default function Register() {
+	const { t, language, switchLanguage } = useTranslation();
 	const router = useRouter();
 	const colorScheme = useColorScheme();
 	const screenHeight = Dimensions.get("window").height;
 	const [zones, setZones] = useState([]);
 	const [zipCode, setZipCode] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	// -------------------------
 	// States
@@ -77,7 +174,12 @@ export default function Register() {
 	const [stateVal, setStateVal] = useState("");
 	const [country, setCountry] = useState("");
 	const [countryData, setCountryData] = useState(null);
+	const languages = [
+		{ code: "en", name: "English", flag: "https://flagcdn.com/w40/gb.png" },
+		{ code: "de", name: "Deutsch", flag: "https://flagcdn.com/w40/de.png" },
+	];
 
+	const selectedLang = languages.find((l) => l.code === language);
 	// -------------------------
 	// Fetch country and check login
 	// -------------------------
@@ -125,50 +227,63 @@ export default function Register() {
 	// Register handler
 	// -------------------------
 	const handleRegister = async () => {
+		console.log("Register function called"); // Debug: function trigger
+
 		if (!name || !phone || !password || !zipCode) {
+			console.log("Validation failed: Missing required fields"); // Debug
 			Alert.alert("Error", "Name, phone, zip code and password are required");
 			return;
 		}
 
 		const sanitizedPhone = phone.replace(/\D/g, "");
+		console.log("Sanitized phone:", sanitizedPhone); // Debug
 
 		const userData = {
 			name,
 			phoneNumber: sanitizedPhone,
-			 email: email.toLowerCase(),
+			email: email.toLowerCase(),
 			password,
 			address: { street, city, state: stateVal, zipCode, country },
 		};
+		console.log("User data payload:", userData); // Debug
 
 		try {
+			console.log("Sending registration request...");
 			const res = await axios.post(
 				"https://frischlyshop-server.onrender.com/api/auth/register",
 				userData,
 				{ headers: { "Content-Type": "application/json" } }
 			);
+
+			console.log("Raw registration response:", res); // Debug
 			if (res.data) {
-				console.log("Registration response", res.data);
+				console.log("Registration response data:", res.data); // Debug
 
 				await AsyncStorage.setItem("userData", JSON.stringify(res.data.data));
+				console.log("User data saved to AsyncStorage"); // Debug
+
 				Alert.alert("Success", "Registration successful!");
 				router.replace("/start");
 			}
 		} catch (error) {
-			console.log("Registration error:", error.errors?.data || error.message);
-Alert.alert(
-	"Error",
-	error.response?.data?.message?.includes("Validation failed")
-		? "Error: Check email if correct or password is strong (password should contain uppercase, lowercase, numbers, and special letters)"
-		: error.response?.data?.message || "Registration failed"
-);
+			console.log("Registration caught error:", error); // Full error object
+			console.log("Error response data:", error.response?.data); // Debug
+			console.log("Error message:", error.message); // Debug
 
+			Alert.alert(
+				"Error",
+				error.response?.data?.message?.includes("Validation failed")
+					? "Error: Check email if correct or password is strong (password should contain uppercase, lowercase, numbers, and special letters)"
+					: error.response?.data?.message || "Registration failed"
+			);
 		}
 	};
 
- 
-const inputBg = "#FFFFFF";
-const inputText = "#000000";
-const placeholderColor = "#666666";
+
+
+	const inputBg = "#FFFFFF";
+	const inputText = "#000000";
+	const placeholderColor = "#666666";
 
 
 	return (
@@ -201,10 +316,39 @@ const placeholderColor = "#666666";
 					/>
 				</View>
 
+
+				<View style={styles.dropdownContainer}>
+					<TouchableOpacity
+						style={styles.dropdownButton}
+						onPress={() => setDropdownOpen(!dropdownOpen)}
+					>
+						<Image source={{ uri: selectedLang.flag }} style={styles.flag} />
+						<Text style={styles.arrow}>{dropdownOpen ? "▲" : "▼"}</Text>
+					</TouchableOpacity>
+
+					{dropdownOpen && (
+						<View style={styles.dropdownList}>
+							{languages.map((lang) => (
+								<TouchableOpacity
+									key={lang.code}
+									style={styles.dropdownItem}
+									onPress={() => {
+										switchLanguage(lang.code);
+										setDropdownOpen(false);
+									}}
+								>
+									<Image source={{ uri: lang.flag }} style={styles.flag} />
+									<Text style={styles.dropdownText}>{lang.name}</Text>
+								</TouchableOpacity>
+							))}
+						</View>
+					)}
+				</View>
+
 				{/* Bottom Inputs */}
 				<View style={{ paddingHorizontal: 24, marginTop: 20 }}>
 					<InputBox
-						placeholder="Full Name"
+						placeholder={t("fullName")}
 						value={name}
 						onChangeText={setName}
 						inputBg={inputBg}
@@ -237,7 +381,7 @@ const placeholderColor = "#666666";
 							</>
 						)}
 						<TextInput
-							placeholder="Phone Number"
+							placeholder={t("phoneNumber")}
 							keyboardType="phone-pad"
 							value={phone}
 							onChangeText={setPhone}
@@ -247,7 +391,7 @@ const placeholderColor = "#666666";
 					</View>
 
 					<InputBox
-						placeholder="Email"
+						placeholder={t("email")}
 						value={email}
 						onChangeText={setEmail}
 						keyboardType="email-address"
@@ -270,7 +414,7 @@ const placeholderColor = "#666666";
 						}}
 					>
 						<TextInput
-							placeholder="Password"
+							placeholder={t("password")}
 							secureTextEntry={!showPassword}
 							value={password}
 							onChangeText={setPassword}
@@ -291,7 +435,7 @@ const placeholderColor = "#666666";
 
 					{/* Address Fields */}
 					<InputBox
-						placeholder="Street"
+						placeholder={t("street")}
 						value={street}
 						onChangeText={setStreet}
 						inputBg={inputBg}
@@ -299,7 +443,7 @@ const placeholderColor = "#666666";
 						placeholderColor={placeholderColor}
 					/>
 					<InputBox
-						placeholder="City"
+						placeholder={t("city")}
 						value={city}
 						onChangeText={setCity}
 						inputBg={inputBg}
@@ -307,7 +451,7 @@ const placeholderColor = "#666666";
 						placeholderColor={placeholderColor}
 					/>
 					<InputBox
-						placeholder="State"
+						placeholder={t("state")}
 						value={stateVal}
 						onChangeText={setStateVal}
 						inputBg={inputBg}
@@ -331,26 +475,42 @@ const placeholderColor = "#666666";
 							onValueChange={(itemValue) => setZipCode(itemValue)}
 							style={{ color: inputText }}
 						>
-							<Picker.Item label="Select Zip Code" value="" />
+							<Picker.Item label={t("selectZipCode")} value="" />
 							{zones.map((zone) => (
 								<Picker.Item
 									key={zone._id}
 									// display both zipCode and zoneName
-									label={`${zone.zipCode} — ${zone.zoneName}`}
+									label={`${zone.zipCode}`}
 									value={zone.zipCode} // only save zipCode
 								/>
 							))}
 						</Picker>
 					</View>
 
-					<InputBox
-						placeholder="Country"
-						value={country}
-						onChangeText={setCountry}
-						inputBg={inputBg}
-						inputText={inputText}
-						placeholderColor={placeholderColor}
-					/>
+					<View
+						style={{
+							marginBottom: 12,
+							width: "100%",
+							minHeight: 55,
+							borderWidth: 1,
+							borderColor: "#000000",
+							borderRadius: 12,
+							backgroundColor: inputBg,
+							justifyContent: "center",
+						}}
+					>
+						<Picker
+							selectedValue={country}
+							onValueChange={(itemValue) => setCountry(itemValue)}
+							style={{ color: inputText }}
+						>
+							<Picker.Item label={t("country")} value="" />
+							{Object.entries(countryMap).map(([name, code]) => (
+								<Picker.Item key={code} label={name} value={code} />
+							))}
+						</Picker>
+					</View>
+
 
 					{/* Register Button */}
 					<TouchableOpacity
@@ -365,7 +525,7 @@ const placeholderColor = "#666666";
 						}}
 					>
 						<Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
-							Register
+							{t("register")}
 						</Text>
 					</TouchableOpacity>
 
@@ -374,7 +534,10 @@ const placeholderColor = "#666666";
 					>
 						<TouchableOpacity onPress={() => router.push("/start")}>
 							<Text style={{ color: "#000", fontSize: 16 }}>
-								Already have an account? Login
+								{t("alreadyHaveAccount")}{" "}
+								<Text style={{ color: "#ffc300" }}>
+									{t("loginHere")}
+								</Text>
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -382,4 +545,112 @@ const placeholderColor = "#666666";
 			</ScrollView>
 		</KeyboardAvoidingView>
 	);
+
+
 }
+
+
+const styles = StyleSheet.create({
+	topNav: {
+		height: 80,
+		flexDirection: "row",
+		alignItems: "center",
+		paddingHorizontal: 10,
+		backgroundColor: "#fff",
+		zIndex: 100,
+		marginTop: 30,
+	},
+	logo: {
+		width: 60,
+		height: 60,
+	},
+	searchBox: {
+		flex: 1,
+		height: 50,
+		marginLeft: 10,
+		borderRadius: 15,
+		borderWidth: 1,
+		borderColor: "#ccc",
+		backgroundColor: "#fff",
+		paddingHorizontal: 15,
+		color: "#000",
+	},
+dropdownContainer: {
+  marginTop: 30,
+  width: "100%",
+  justifyContent: "center",
+  alignItems: "center",
+  position: "absolute", 
+},
+
+	dropdownButton: {
+		flexDirection: "row",
+		alignItems: "center",
+		paddingHorizontal: 8,
+		paddingVertical: 6,
+	},
+	flag: {
+		width: 24,
+		height: 16,
+		borderRadius: 3,
+		marginRight: 6,
+	},
+	dropdownText: {
+		color: "#000",
+		fontSize: 14,
+	},
+	arrow: {
+		marginLeft: 5,
+		fontSize: 12,
+		color: "#333",
+	},
+dropdownList: {
+  position: "absolute",
+  top: 45,
+  alignSelf: "center",
+  backgroundColor: "#fff",
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 10,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 5,
+  elevation: 3,
+  width: 150,
+  zIndex: 200,
+},
+
+	dropdownItem: {
+		flexDirection: "row",
+		alignItems: "center",
+		paddingVertical: 8,
+		paddingHorizontal: 10,
+	},
+
+
+	dropdownContainer: {
+  width: "100%",
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: 20,
+},
+dropdownButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 8,
+  paddingVertical: 6,
+},
+dropdownList: {
+  backgroundColor: "#fff",
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 10,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 5,
+  elevation: 3,
+  width: 130,
+  marginTop: 5,
+},
+
+});
