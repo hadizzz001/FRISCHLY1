@@ -364,7 +364,7 @@ setForm({
           {zones.map((zone) => (
             <Picker.Item
               key={zone._id}
-              label={`${zone.zipCode} — ${zone.zoneName}`}
+              label={`${zone.zipCode} `}
               value={zone.zipCode}
             />
           ))}
