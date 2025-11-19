@@ -16,6 +16,7 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import OrderComponent from "../components/CreateOrderButton";
 
 const CheckoutScreen = () => {
@@ -247,9 +248,10 @@ const CheckoutScreen = () => {
 	}
 
 	return (
+		<SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
 		<ScrollView
 			style={styles.container}
-			contentContainerStyle={{ paddingBottom: 100 }}
+			contentContainerStyle={{ paddingBottom: 150 }}
 		>
 			<TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
 				<Feather name="chevron-left" size={24} color="#000000" />
@@ -389,6 +391,7 @@ const CheckoutScreen = () => {
 
 			<OrderComponent items={cart} customer={state.user} />
 		</ScrollView>
+		</SafeAreaView>
 	);
 };
 
@@ -437,6 +440,7 @@ const styles = StyleSheet.create({
 		marginTop: 60,
 	},
 	emptyText: { fontSize: 18, marginBottom: 20 },
+	safeArea: { flex: 1, backgroundColor: "#FFFFFF" }
 });
 
 export default CheckoutScreen;

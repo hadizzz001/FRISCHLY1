@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
 import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useEffect, useState } from "react";
 import {
@@ -325,6 +326,8 @@ const renderProduct = ({ item }) => {
 	}
 
 	return (
+
+<SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
 		<View style={styles.container}>
 			{/* Back arrow + Categories */}
 			<View style={styles.categoryHeader}>
@@ -401,6 +404,7 @@ const renderProduct = ({ item }) => {
 
 			{/* Products Grid */}
 <FlatList
+contentContainerStyle={{ paddingBottom: 120 }}
     data={products}
     keyExtractor={(item) => item._id}
     renderItem={renderProduct}
@@ -411,8 +415,7 @@ const renderProduct = ({ item }) => {
         isFetchingMore ? (
             <ActivityIndicator size="small" color="#ffc300" />
         ) : null
-    }
-    contentContainerStyle={{ paddingHorizontal: 8 }}
+    } 
 />
 
 
@@ -529,6 +532,7 @@ const renderProduct = ({ item }) => {
 				</View>
 			)}
 		</View>
+		</SafeAreaView>
 	);
 }
 
@@ -813,5 +817,9 @@ filterOverlay: {
 	paddingTop: 50,
 },
 
+safeArea: {
+  flex: 1,
+  backgroundColor: "#fff",
+}
 
 });

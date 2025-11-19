@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 
  
 
@@ -272,6 +273,8 @@ const renderItem = ({ item }) => (
 
 
   return (
+
+<SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
     <View style={styles.container}>
             <TouchableOpacity onPress={() => router.back()} style={{marginBottom: 15}}>
               <Feather name="chevron-left" size={24} color="#000000" />
@@ -280,6 +283,7 @@ const renderItem = ({ item }) => (
         data={orders}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 120 }} // ✅ ensures content not cut off
       />
 
       <Modal
@@ -335,6 +339,7 @@ const renderItem = ({ item }) => (
 </Modal>
 
     </View>
+    </SafeAreaView>
   );
 }
 
@@ -391,4 +396,8 @@ const styles = StyleSheet.create({
   itemText: {
     flex: 1,
   },
+  safeArea: {
+  flex: 1,
+  backgroundColor: "#fff",
+}
 });

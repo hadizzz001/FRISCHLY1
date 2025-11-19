@@ -10,7 +10,6 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "displayName": "Frischly Shop",
       "bundleIdentifier": "com.alihadimedlej001.myMob",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -26,8 +25,7 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "com.alihadimedlej001.frischlyshop1",
-      "displayName": "Frischly Shop"
+      "package": "com.alihadimedlej001.frischlyshop1"
     },
     "web": {
       "bundler": "metro",
@@ -46,7 +44,8 @@
       "expo-audio",
       "expo-font",
       "expo-video",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

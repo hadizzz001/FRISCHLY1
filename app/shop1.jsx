@@ -17,6 +17,7 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 3 - 13; // three items per row with spacing
@@ -222,7 +223,9 @@ const increaseQty = (product) => {
 	}
 
 	return (
-		<ScrollView style={styles.container}>
+		
+		<SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
+		<ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
 			{/* Back Button */}
 			<View style={styles.header}>
 				<TouchableOpacity
@@ -244,11 +247,13 @@ const increaseQty = (product) => {
 				</View>
 			))}
 		</ScrollView>
+		</SafeAreaView>
+		 
 	);
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#FFFFFF" },
+	container: { flex: 1, backgroundColor: "#FFFFFF",   },
 	loader: {
 		flex: 1,
 		justifyContent: "center",
@@ -341,4 +346,8 @@ const styles = StyleSheet.create({
 	},
 	qtyText: { fontSize: 14, fontWeight: "700", color: "#fff" },
 	qtyValue: { marginHorizontal: 6, fontSize: 14, fontWeight: "500", color: "#000" },
+	safeArea: {
+  flex: 1,
+  backgroundColor: "#fff",
+}
 });

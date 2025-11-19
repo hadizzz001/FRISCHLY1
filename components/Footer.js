@@ -2,7 +2,8 @@ import { useTranslation } from "@/contexts/TranslationContext";
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // or next/navigation / @react-navigation/native
 import { useEffect, useState } from "react";
-import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Footer() {
   const [categories, setCategories] = useState([]);
@@ -54,6 +55,7 @@ export default function Footer() {
   ];
 
   return (
+ <SafeAreaView edges={['bottom']} style={{ backgroundColor: '#f8f8f8' }}>
   <View style={styles.footer}>
  
       {/* Sections */}
@@ -109,11 +111,12 @@ export default function Footer() {
         © Frischly Shop {new Date().getFullYear()} ALL RIGHTS RESERVED
       </Text>
     </View>
+</SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  footer: { backgroundColor: "#f8f8f8", padding: 20 },
+  footer: { backgroundColor: "#f8f8f8", padding: 20, paddingBottom: 60, },
   iconRow: { flexDirection: "row", justifyContent: "center", flexWrap: "wrap", marginBottom: 20 },
   payIcon: { width: 60, height: 40, margin: 5, resizeMode: "contain" },
   section: { marginVertical: 10, borderBottomWidth: 1, borderColor: "#ccc", paddingBottom: 10 },
