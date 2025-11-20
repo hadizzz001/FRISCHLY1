@@ -184,7 +184,6 @@ export default function Register() {
 	// Fetch country and check login
 	// -------------------------
 	useEffect(() => {
-		fetchCountry();
 		checkLogin();
 	}, []);
 
@@ -203,20 +202,7 @@ export default function Register() {
 		};
 		fetchZones();
 	}, []);
-
-	const fetchCountry = async () => {
-		try {
-			const res = await axios.get("https://ipwho.is/");
-			setCountryData({
-				code: res.data.country_code,
-				flag: `https://flagcdn.com/24x18/${res.data.country_code.toLowerCase()}.png`,
-				dial: `+${res.data.calling_code}`,
-			});
-			setCountry(res.data.country);
-		} catch (e) {
-			console.log("Country fetch error", e);
-		}
-	};
+ 
 
 	const checkLogin = async () => {
 		const userData = await AsyncStorage.getItem("userData");
