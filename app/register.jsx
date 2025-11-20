@@ -371,7 +371,7 @@ export default function Register() {
 							paddingHorizontal: 10,
 						}}
 					>
-						{countryData && (
+						{/* {countryData && (
 							<>
 								<Image
 									source={{ uri: countryData.flag }}
@@ -379,7 +379,7 @@ export default function Register() {
 								/>
 								<Text style={{ marginHorizontal: 8 }}>{countryData.dial}</Text>
 							</>
-						)}
+						)} */}
 						<TextInput
 							placeholder={t("phoneNumber")}
 							keyboardType="phone-pad"
