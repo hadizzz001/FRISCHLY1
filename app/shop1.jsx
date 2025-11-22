@@ -1,7 +1,6 @@
 "use client";
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
@@ -22,8 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 3 - 13; // three items per row with spacing
 
-export default function ShopPage() {
-	const colorScheme = useColorScheme();
+export default function ShopPage() { 
 	const router = useRouter();
 	const { category } = useLocalSearchParams();
 	const { cart, addToCart, removeFromCart } = useCart(); // ✅ Cart context

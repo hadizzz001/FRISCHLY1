@@ -1,17 +1,15 @@
 import { Feather } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useCart } from "@/contexts/CartContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
-export default function TabLayout() {
-	const colorScheme = useColorScheme();
+export default function TabLayout() { 
 	const { cart } = useCart();
 	const [loading, setLoading] = useState(true);
 	const router = useRouter();

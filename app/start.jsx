@@ -17,15 +17,13 @@ import {
 	Text,
 	TextInput,
 	TouchableOpacity,
-	useColorScheme,
-	View,
+	View
 } from "react-native";
 
 export default function Start() {
 	const { t } = useTranslation();
 
-	const router = useRouter();
-	const colorScheme = useColorScheme();
+	const router = useRouter(); 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);

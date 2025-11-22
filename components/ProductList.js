@@ -18,16 +18,13 @@ import Feather from "react-native-vector-icons/Feather";
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
 import { useTranslation } from "@/contexts/TranslationContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 3 - 15;
 const LIMIT = 10; // items per fetch
 
 export default function ShopPage({ refreshTrigger, setRefreshing }) {
-	const { t } = useTranslation();
-
-	const colorScheme = useColorScheme();
+	const { t } = useTranslation(); 
 	const router = useRouter();
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);

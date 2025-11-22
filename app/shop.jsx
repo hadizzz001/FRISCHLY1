@@ -23,7 +23,6 @@ import {
 
 import { useBooleanValue } from "@/contexts/CartBoolContext";
 import { useCart } from "@/contexts/CartContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width / 3 - 12; // 3 items per row, adjust margin
@@ -31,8 +30,7 @@ const ITEM_WIDTH = width / 3 - 12; // 3 items per row, adjust margin
 
 export default function ShopPage() {
 	const { t } = useTranslation();
-
-	const colorScheme = useColorScheme();
+ 
 	const router = useRouter();
 	const searchParams = useLocalSearchParams();
 

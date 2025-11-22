@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import { BooleanProvider } from "@/contexts/CartBoolContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { TranslationProvider } from "@/contexts/TranslationContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { useFonts } from "expo-font";
 import { Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -12,8 +11,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import "react-native-reanimated";
 
-export default function RootLayout() {
-	const colorScheme = useColorScheme();
+export default function RootLayout() { 
 	const pathname = usePathname(); // current route
 	const [loaded] = useFonts({
 		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),

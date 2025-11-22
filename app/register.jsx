@@ -18,7 +18,6 @@ import {
 	Text,
 	TextInput,
 	TouchableOpacity,
-	useColorScheme,
 	View
 } from "react-native";
 
@@ -154,8 +153,7 @@ const InputBox = ({
 
 export default function Register() {
 	const { t, language, switchLanguage } = useTranslation();
-	const router = useRouter();
-	const colorScheme = useColorScheme();
+	const router = useRouter(); 
 	const screenHeight = Dimensions.get("window").height;
 	const [zones, setZones] = useState([]);
 	const [zipCode, setZipCode] = useState("");
@@ -567,6 +565,7 @@ dropdownContainer: {
   justifyContent: "center",
   alignItems: "center",
   position: "absolute", 
+  zIndex: 9999,
 },
 
 	dropdownButton: {
@@ -638,5 +637,60 @@ dropdownList: {
   width: 130,
   marginTop: 5,
 },
+
+
+ dropdownContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 20,
+    zIndex: 9999, // 🔥 FIX: ensures it appears above everything
+  },
+
+  dropdownButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+
+  dropdownList: {
+    position: "absolute",
+    top: 40,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 10,
+    width: 150,
+    zIndex: 99999,
+  },
+
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+
+  flag: {
+    width: 24,
+    height: 16,
+    marginRight: 8,
+    borderRadius: 3,
+  },
+
+  dropdownText: {
+    color: "#000",
+    fontSize: 14,
+  },
+
+  arrow: {
+    marginLeft: 5,
+    fontSize: 14,
+    color: "#333",
+  },
 
 });
