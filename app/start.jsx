@@ -66,11 +66,23 @@ export default function Start() {
 				Alert.alert("Login Failed", "Invalid email or password");
 			}
 		} catch (error) {
-			console.log("Login error:", error.response?.data || error.message);
-			Alert.alert("Login Failed", "Invalid email or password or email not verfied");
-		} finally {
-			setLoading(false);
-		}
+    console.log("Login error:", error.response?.data || error.message);
+
+    // Extract exact backend message
+    const backendMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Unknown error occurred";
+
+    Alert.alert(
+        "Login Failed",
+        backendMessage
+    );
+} finally {
+    setLoading(false);
+}
+
 	};
 
 

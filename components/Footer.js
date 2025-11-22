@@ -82,7 +82,7 @@ export default function Footer() {
         <TouchableOpacity onPress={() => Linking.openURL("https://www.instagram.com/frischly_?igsh=MWs1dWM0dWUwMTJzbA%3D%3D&utm_source=qr")}>
           <View style={[styles.circle, { backgroundColor: "#E1306C" }]}><FontAwesome name="instagram" size={24} color="white" /></View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL("https://www.facebook.com/profile.php?id=61579260987923")}>
+        <TouchableOpacity onPress={() => Linking.openURL("https://www.facebook.com/profile.php?id=61579362112804")}>
           <View style={[styles.circle, { backgroundColor: "#1877F2" }]}><FontAwesome name="facebook" size={24} color="white" /></View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => Linking.openURL("tel:+4915256429941")}>
